@@ -1,0 +1,145 @@
+@import 'tailwindcss';
+
+@import 'tw-animate-css';
+
+@source '../views';
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+
+@theme {
+    --font-sans:
+        'Instrument Sans', ui-sans-serif, system-ui, sans-serif,
+        'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+        'Noto Color Emoji';
+
+    --color-brand-50: #f0f7f0;
+    --color-brand-100: #dcefdc;
+    --color-brand-200: #b9dfb9;
+    --color-brand-300: #8ec88e;
+    --color-brand-400: #5eac5e;
+    --color-brand-500: #3a8a3a;
+    --color-brand-600: #2d6e2d;
+    --color-brand-700: #255825;
+    --color-brand-800: #1f4720;
+    --color-brand-900: #1a3b1b;
+
+    --color-cream-50: #fefcf5;
+    --color-cream-100: #fdf8e8;
+    --color-cream-200: #f9f0cc;
+
+    --color-gold-400: #d4a843;
+    --color-gold-500: #c99a2e;
+    --color-gold-600: #b08420;
+
+    --radius-lg: var(--radius);
+    --radius-md: calc(var(--radius) - 2px);
+    --radius-sm: calc(var(--radius) - 4px);
+
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+
+    --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+
+    --color-popover: var(--popover);
+    --color-popover-foreground: var(--popover-foreground);
+
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+
+    --color-destructive: var(--destructive);
+    --color-destructive-foreground: var(--destructive-foreground);
+
+    --color-border: var(--border);
+    --color-input: var(--input);
+    --color-ring: var(--ring);
+
+    --color-chart-1: var(--chart-1);
+    --color-chart-2: var(--chart-2);
+    --color-chart-3: var(--chart-3);
+    --color-chart-4: var(--chart-4);
+    --color-chart-5: var(--chart-5);
+
+    --color-sidebar: var(--sidebar);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-ring: var(--sidebar-ring);
+}
+
+:root {
+    --background: #fefcf5;
+    --foreground: #1a3b1b;
+    --card: #ffffff;
+    --card-foreground: #1a3b1b;
+    --popover: #ffffff;
+    --popover-foreground: #1a3b1b;
+    --primary: #1f4720;
+    --primary-foreground: #fefcf5;
+    --secondary: #fdf8e8;
+    --secondary-foreground: #255825;
+    --muted: #f0f7f0;
+    --muted-foreground: #255825;
+    --accent: #dcefdc;
+    --accent-foreground: #1f4720;
+    --destructive: oklch(0.577 0.245 27.325);
+    --destructive-foreground: oklch(0.577 0.245 27.325);
+    --border: #dcefdc;
+    --input: #dcefdc;
+    --ring: #3a8a3a;
+    --chart-1: #3a8a3a;
+    --chart-2: #2d6e2d;
+    --chart-3: #8ec88e;
+    --chart-4: #c99a2e;
+    --chart-5: #d4a843;
+    --radius: 0.625rem;
+    --sidebar: #1f4720;
+    --sidebar-foreground: #fefcf5;
+    --sidebar-primary: #3a8a3a;
+    --sidebar-primary-foreground: #fefcf5;
+    --sidebar-accent: #c99a2e;
+    --sidebar-accent-foreground: #1f4720;
+    --sidebar-border: #2d6e2d;
+    --sidebar-ring: #b08420;
+}
+
+@layer base {
+    * {
+        @apply border-border;
+    }
+
+    body {
+        @apply bg-background text-foreground;
+    }
+}
+
+@keyframes fade-up {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@utility hero-overlay {
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.75) 100%);
+}
+
+@utility animate-fade-up {
+    animation: fade-up 0.6s ease-out forwards;
+    opacity: 0;
+}
