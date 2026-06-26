@@ -3,6 +3,7 @@
 use App\Enums\RoleEnum;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\FloorController;
+use App\Http\Controllers\Admin\GuestController;
 use App\Http\Controllers\Admin\RoomController;
 use App\Http\Controllers\BookingController;
 use Illuminate\Support\Facades\Route;
@@ -31,6 +32,11 @@ Route::middleware(['auth', 'role:'.RoleEnum::Admin->value])->prefix('admin')->na
     Route::get('rooms/{room}/edit', [RoomController::class, 'edit'])->name('rooms.edit');
     Route::patch('rooms/{room}', [RoomController::class, 'update'])->name('rooms.update');
     Route::delete('rooms/{room}', [RoomController::class, 'destroy'])->name('rooms.destroy');
+
+    // Guests
+    Route::get('guests', [GuestController::class, 'index'])->name('guests.index');
+    Route::post('guests/{user}/suspend', [GuestController::class, 'suspend'])->name('guests.suspend');
+    Route::post('guests/{user}/reinstate', [GuestController::class, 'reinstate'])->name('guests.reinstate');
 
     // Bookings
     Route::get('bookings', [BookingController::class, 'adminIndex'])->name('bookings.index');
