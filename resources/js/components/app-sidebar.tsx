@@ -109,9 +109,9 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={mainNavItems} />
-                {!isAdmin && <NavMain items={guestNavItems} />}
-                {isAdmin && <NavMain items={adminNavItems} />}
+                <NavMain items={mainNavItems} label="Main" />
+                {!isAdmin && <NavMain items={guestNavItems} label="Bookings" />}
+                {isAdmin && <NavMain items={adminNavItems} label="Management" />}
             </SidebarContent>
 
             <SidebarFooter>
