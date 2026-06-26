@@ -18,6 +18,10 @@ class CreateGuestRequestAction
      */
     public function create(User $user, array $data): GuestRequest
     {
+        if ($user->is_suspended) {
+            throw new \RuntimeException('Your account has been suspended. You cannot make requests.');
+        }
+
         $hasActiveStay = Reservation::where('user_id', $user->id)
             ->where('status', ReservationStatusEnum::CheckedIn->value)
             ->exists();

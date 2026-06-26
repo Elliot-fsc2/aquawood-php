@@ -27,13 +27,14 @@ class GuestRequestController extends Controller
             ->latest()
             ->get();
 
-        $hasActiveStay = Reservation::where('user_id', $user->id)
-            ->where('status', ReservationStatusEnum::CheckedIn->value)
-            ->exists();
+        $canMakeRequest = ! $user->is_suspended
+            && Reservation::where('user_id', $user->id)
+                ->where('status', ReservationStatusEnum::CheckedIn->value)
+                ->exists();
 
         return Inertia::render('requests/index', [
             'requests' => $requests,
-            'canMakeRequest' => $hasActiveStay,
+            'canMakeRequest' => $canMakeRequest,
         ]);
     }
 
