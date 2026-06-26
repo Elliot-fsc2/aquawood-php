@@ -1,5 +1,6 @@
 import { Link } from '@inertiajs/react';
-import { LayoutGrid, Leaf } from 'lucide-react';
+import { usePage } from '@inertiajs/react';
+import { BedDouble, BookOpen, Building2, LayoutGrid, Leaf, Tag } from 'lucide-react';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -14,6 +15,10 @@ import {
     useSidebar,
 } from '@/components/ui/sidebar';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { index as adminCategoriesIndex } from '@/routes/admin/categories';
+import { index as adminFloorsIndex } from '@/routes/admin/floors';
+import { index as adminRoomsIndex } from '@/routes/admin/rooms';
+import { index as bookingsIndex } from '@/routes/bookings';
 import { dashboard } from '@/routes';
 import type { NavItem } from '@/types';
 
@@ -32,6 +37,34 @@ const footerNavItems: NavItem[] = [
 export function AppSidebar() {
     const { setOpenMobile } = useSidebar();
     const isMobile = useIsMobile();
+    const { auth } = usePage().props;
+    const isAdmin = auth.roles?.includes('Admin') ?? false;
+
+    const guestNavItems: NavItem[] = [
+        {
+            title: 'Bookings',
+            href: bookingsIndex(),
+            icon: BookOpen,
+        },
+    ];
+
+    const adminNavItems: NavItem[] = [
+        {
+            title: 'Floors',
+            href: adminFloorsIndex(),
+            icon: Building2,
+        },
+        {
+            title: 'Rooms',
+            href: adminRoomsIndex(),
+            icon: BedDouble,
+        },
+        {
+            title: 'Categories',
+            href: adminCategoriesIndex(),
+            icon: Tag,
+        },
+    ];
 
     const handleNavClick = () => {
         if (isMobile) {
@@ -65,6 +98,8 @@ export function AppSidebar() {
 
             <SidebarContent>
                 <NavMain items={mainNavItems} />
+                {!isAdmin && <NavMain items={guestNavItems} />}
+                {isAdmin && <NavMain items={adminNavItems} />}
             </SidebarContent>
 
             <SidebarFooter>

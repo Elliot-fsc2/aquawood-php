@@ -20,7 +20,6 @@ class RoomCategorySeeder extends Seeder
                 'floor_code' => 'FL-1',
                 'base_price' => 145,
                 'capacity' => 2,
-                'quantity' => 6,
                 'amenities' => ['WiFi', 'Smart TV', 'Mini Bar'],
             ],
             [
@@ -28,7 +27,6 @@ class RoomCategorySeeder extends Seeder
                 'floor_code' => 'FL-2',
                 'base_price' => 225,
                 'capacity' => 2,
-                'quantity' => 7,
                 'amenities' => ['WiFi', 'Garden View', 'Balcony'],
             ],
             [
@@ -36,7 +34,6 @@ class RoomCategorySeeder extends Seeder
                 'floor_code' => 'FL-3',
                 'base_price' => 385,
                 'capacity' => 3,
-                'quantity' => 5,
                 'amenities' => ['Lagoon View', 'Jacuzzi', 'Living Area'],
             ],
             [
@@ -44,7 +41,6 @@ class RoomCategorySeeder extends Seeder
                 'floor_code' => 'FL-3',
                 'base_price' => 495,
                 'capacity' => 5,
-                'quantity' => 4,
                 'amenities' => ['Private Pool', 'Kitchen', 'Kids Corner'],
             ],
             [
@@ -52,7 +48,6 @@ class RoomCategorySeeder extends Seeder
                 'floor_code' => 'FL-4',
                 'base_price' => 895,
                 'capacity' => 2,
-                'quantity' => 2,
                 'amenities' => ['Butler Service', 'Private Terrace'],
             ],
         ];
@@ -66,7 +61,6 @@ class RoomCategorySeeder extends Seeder
                 'floor_id' => $floor->id,
                 'base_price' => $category['base_price'],
                 'capacity' => $category['capacity'],
-                'quantity' => $category['quantity'],
                 'amenities' => $category['amenities'],
             ]);
         }
