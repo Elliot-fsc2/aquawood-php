@@ -7,6 +7,7 @@ use App\Enums\RoomStatusEnum;
 use App\Models\Reservation;
 use App\Models\Room;
 use App\Models\RoomCategory;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -46,6 +47,12 @@ class CreateBookingAction
         // Verify the room category exists
         if (! RoomCategory::where('id', $data['room_category_id'])->exists()) {
             throw new \RuntimeException('The selected room category does not exist.');
+        }
+
+        // Check if the user is suspended
+        $user = User::find($data['user_id']);
+        if ($user && $user->is_suspended) {
+            throw new \RuntimeException('Your account has been suspended. Please contact support to make a reservation.');
         }
     }
 
