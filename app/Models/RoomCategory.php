@@ -21,10 +21,23 @@ class RoomCategory extends Model
     protected function casts(): array
     {
         return [
-            'amenities' => 'array',
             'base_price' => 'decimal:2',
             'capacity' => 'integer',
         ];
+    }
+
+    /**
+     * The amenities are double-encoded in the database.
+     */
+    public function getAmenitiesAttribute(mixed $value): array
+    {
+        if (is_array($value)) {
+            return $value;
+        }
+
+        $decoded = json_decode((string) $value, true);
+
+        return is_array($decoded) ? $decoded : (json_decode((string) $decoded, true) ?: []);
     }
 
     /**

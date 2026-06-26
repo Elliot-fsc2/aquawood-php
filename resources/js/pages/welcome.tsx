@@ -1,5 +1,6 @@
 import { Head, Link, usePage, router } from '@inertiajs/react';
 import { dashboard, login, register, home } from '@/routes';
+import { publicCreate as bookingsPublicCreate } from '@/routes/bookings';
 import {
     Leaf,
     Waves,
@@ -14,6 +15,15 @@ import {
     Sparkles,
     ChevronDown,
     Navigation,
+    Wifi,
+    Wind,
+    Tv,
+    Refrigerator,
+    Coffee,
+    Bath,
+    Dumbbell,
+    VolumeX,
+    Car,
 } from 'lucide-react';
 
 const heroImg = '/images/aquawood-hero.jpg';
@@ -37,8 +47,36 @@ const MAP_EMBED =
 const MAP_LINK =
     'https://www.google.com/maps/search/?api=1&query=Aquawood+Garden+Resort+Candelaria+Quezon&query_place_id=13.9293,121.4378';
 
+interface Floor {
+    id: number;
+    name: string;
+}
+
+interface Category {
+    id: number;
+    name: string;
+    base_price: string;
+    capacity: number;
+    amenities: string[] | null;
+    image: string | null;
+    available_rooms_count: number;
+    floor: Floor | null;
+}
+
+const amenityIcons: Record<string, React.ReactNode> = {
+    wifi: <Wifi className="h-3.5 w-3.5" />,
+    'air conditioning': <Wind className="h-3.5 w-3.5" />,
+    tv: <Tv className="h-3.5 w-3.5" />,
+    'mini bar': <Refrigerator className="h-3.5 w-3.5" />,
+    'coffee maker': <Coffee className="h-3.5 w-3.5" />,
+    bathtub: <Bath className="h-3.5 w-3.5" />,
+    gym: <Dumbbell className="h-3.5 w-3.5" />,
+    'sound proof': <VolumeX className="h-3.5 w-3.5" />,
+    parking: <Car className="h-3.5 w-3.5" />,
+};
+
 export default function Welcome() {
-    const { auth, property: prop, rooms: roomList } = usePage().props;
+    const { auth, property: prop, roomCategories } = usePage().props;
 
     const p = prop || {};
     const name = p.name || 'Aquawood Garden Resort';
@@ -46,20 +84,8 @@ export default function Welcome() {
     const subName =
         name.split(',').slice(1).join(',').trim() || 'Garden Resort';
 
-    const rooms = roomList || [];
-    const featuredRooms = rooms
-        .filter((r: { type: string }) =>
-            [
-                'Lagoon Suite',
-                'Presidential Suite',
-                'Family Villa',
-                'Deluxe Garden',
-            ].includes(r.type),
-        )
-        .slice(0, 4);
-    const uniqueTypes = Array.from(
-        new Set(featuredRooms.map((r: { type: string }) => r.type)),
-    );
+    const categories: Category[] = roomCategories || [];
+    const featuredCategories = categories.slice(0, 4);
 
     return (
         <>
@@ -135,14 +161,12 @@ export default function Welcome() {
                                     >
                                         Login
                                     </Link>
-                                    <button
-                                        onClick={() =>
-                                            router.visit('/account/bookings')
-                                        }
+                                    <Link
+                                        href={bookingsPublicCreate()}
                                         className="rounded-full bg-brand-800 px-5 py-2 text-cream-50 transition hover:bg-brand-900"
                                     >
                                         Book Now
-                                    </button>
+                                    </Link>
                                 </>
                             )}
                         </nav>
@@ -181,15 +205,13 @@ export default function Welcome() {
                             className="flex animate-fade-up flex-wrap justify-center gap-4"
                             style={{ animationDelay: '0.3s' }}
                         >
-                            <button
-                                onClick={() =>
-                                    router.visit('/account/bookings')
-                                }
+                            <Link
+                                href={bookingsPublicCreate()}
                                 className="flex items-center gap-2 rounded-full bg-gold-500 px-8 py-3.5 font-medium text-white transition hover:bg-gold-600"
                             >
                                 Reserve Your Stay{' '}
                                 <ArrowRight className="h-4 w-4" />
-                            </button>
+                            </Link>
                             <a
                                 href="#rooms"
                                 className="rounded-full border border-cream-50/60 px-8 py-3.5 text-cream-50 transition hover:bg-cream-50/10"
@@ -275,73 +297,113 @@ export default function Welcome() {
                     <div className="mx-auto max-w-7xl">
                         <div className="mb-16 text-center">
                             <div className="mb-4 text-xs tracking-[0.3em] text-gold-400 uppercase">
-                                Accommodations
+                                Featured Room Categories
                             </div>
                             <h2 className="mb-4 font-serif text-5xl">
-                                Rooms & Suites
+                                Choose your perfect stay
                             </h2>
                             <p className="mx-auto max-w-2xl text-cream-100/70">
-                                Choose from {p.totalRooms || 20} comfortable
-                                rooms — from cozy standard rooms perfect for
-                                couples, to spacious family villas with
-                                kitchenettes and garden views.
+                                Browse our selection of comfortable room
+                                categories — each designed to make your stay
+                                memorable. Pick your dates and book in just a
+                                few clicks.
                             </p>
                         </div>
-                        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-                            {uniqueTypes.map((type) => {
-                                const room = featuredRooms.find(
-                                    (r: { type: string }) => r.type === type,
-                                )!;
-                                return (
+
+                        {featuredCategories.length > 0 ? (
+                            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+                                {featuredCategories.map((cat) => (
                                     <div
-                                        key={type}
-                                        className="group cursor-pointer"
+                                        key={cat.id}
+                                        className="group flex flex-col"
                                     >
-                                        <div className="relative mb-4 aspect-[3/4] overflow-hidden rounded-lg">
-                                            <img
-                                                src={aq.room}
-                                                alt={type}
-                                                className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
-                                            />
-                                            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-                                            <div className="absolute right-4 bottom-4 left-4">
-                                                <div className="mb-1 text-xs tracking-wider text-gold-400 uppercase">
-                                                    From ₱
-                                                    {room?.baseRate?.toLocaleString() ||
-                                                        '2,500'}
-                                                    /night
+                                        <div className="relative mb-4 aspect-[4/3] overflow-hidden rounded-lg">
+                                            {cat.image ? (
+                                                <img
+                                                    src={'/storage/' + cat.image}
+                                                    alt={cat.name}
+                                                    className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
+                                                />
+                                            ) : (
+                                                <div className="flex h-full items-center justify-center bg-brand-800 text-gold-400/40">
+                                                    <svg
+                                                        className="h-16 w-16"
+                                                        fill="none"
+                                                        viewBox="0 0 24 24"
+                                                        stroke="currentColor"
+                                                    >
+                                                        <path
+                                                            strokeLinecap="round"
+                                                            strokeLinejoin="round"
+                                                            strokeWidth={1}
+                                                            d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
+                                                        />
+                                                    </svg>
                                                 </div>
-                                                <div className="font-serif text-2xl">
-                                                    {type}
+                                            )}
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                                            <div className="absolute right-3 bottom-3 left-3">
+                                                <div className="text-sm font-semibold text-gold-400">
+                                                    From ₱{parseFloat(cat.base_price).toFixed(0)}/night
                                                 </div>
                                             </div>
                                         </div>
-                                        <p className="text-sm text-cream-100/70">
-                                            {room?.beds || '1 Queen'} · Up to{' '}
-                                            {room?.capacity || 2} guests ·{' '}
-                                            {(
-                                                room?.amenities || [
-                                                    'Aircon',
-                                                    'WiFi',
-                                                    'TV',
-                                                ]
-                                            )
-                                                .slice(0, 3)
-                                                .join(', ')}
+
+                                        <h3 className="mb-1 font-serif text-xl">
+                                            {cat.name}
+                                        </h3>
+
+                                        <p className="mb-3 text-sm text-cream-100/60">
+                                            Up to {cat.capacity} guests
+                                            {cat.floor
+                                                ? ` · ${cat.floor.name}`
+                                                : ''}
                                         </p>
+
+                                        {cat.amenities && cat.amenities.length > 0 && (
+                                            <div className="mb-4 flex flex-wrap gap-1.5">
+                                                {cat.amenities
+                                                    .slice(0, 4)
+                                                    .map((amenity, i) => (
+                                                        <span
+                                                            key={i}
+                                                            className="inline-flex items-center gap-1 rounded-full bg-brand-800/60 px-2.5 py-0.5 text-[11px] text-cream-100/80"
+                                                        >
+                                                            {amenityIcons[
+                                                                amenity.toLowerCase()
+                                                            ] || null}
+                                                            {amenity}
+                                                        </span>
+                                                    ))}
+                                            </div>
+                                        )}
+
+                                        <div className="mt-auto pt-2">
+                                            <Link
+                                                href={bookingsPublicCreate()}
+                                                className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-gold-500 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-gold-600"
+                                            >
+                                                Book Now
+                                                <ArrowRight className="h-4 w-4" />
+                                            </Link>
+                                        </div>
                                     </div>
-                                );
-                            })}
-                        </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="py-12 text-center text-cream-100/50">
+                                <p>Room categories coming soon.</p>
+                            </div>
+                        )}
+
                         <div className="mt-12 text-center">
-                            <button
-                                onClick={() =>
-                                    router.visit('/account/bookings')
-                                }
-                                className="rounded-full bg-gold-500 px-8 py-3 text-white transition hover:bg-gold-600"
+                            <Link
+                                href={bookingsPublicCreate()}
+                                className="inline-flex items-center gap-2 rounded-full border border-cream-50/30 px-8 py-3 text-cream-50 transition hover:bg-cream-50/10"
                             >
-                                Check Availability
-                            </button>
+                                View All Categories
+                                <ArrowRight className="h-4 w-4" />
+                            </Link>
                         </div>
                     </div>
                 </section>
@@ -442,14 +504,13 @@ export default function Welcome() {
                                     </li>
                                 ))}
                             </ul>
-                            <button
-                                onClick={() =>
-                                    router.visit('/account/bookings')
-                                }
-                                className="rounded-full bg-brand-800 px-8 py-3 text-cream-50 transition hover:bg-brand-900"
+                            <Link
+                                href={bookingsPublicCreate()}
+                                className="inline-flex items-center gap-2 rounded-full bg-brand-800 px-8 py-3 text-cream-50 transition hover:bg-brand-900"
                             >
                                 Request Proposal
-                            </button>
+                                <ArrowRight className="h-4 w-4" />
+                            </Link>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <img

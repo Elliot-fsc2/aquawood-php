@@ -15,9 +15,10 @@ import { request } from '@/routes/password';
 type Props = {
     status?: string;
     canResetPassword: boolean;
+    redirectTo?: string | null;
 };
 
-export default function Login({ status, canResetPassword }: Props) {
+export default function Login({ status, canResetPassword, redirectTo }: Props) {
     return (
         <>
             <Head title="Log in" />
@@ -31,6 +32,10 @@ export default function Login({ status, canResetPassword }: Props) {
             >
                 {({ processing, errors }) => (
                     <>
+                        {redirectTo && (
+                            <input type="hidden" name="redirectTo" value={redirectTo} />
+                        )}
+
                         <div className="grid gap-6">
                             <div className="grid gap-2">
                                 <Label htmlFor="email" className="text-brand-700">
@@ -103,7 +108,11 @@ export default function Login({ status, canResetPassword }: Props) {
 
                         <div className="text-center text-sm text-brand-700/60">
                             Don't have an account?{' '}
-                            <TextLink href={register()} tabIndex={5} className="text-gold-600 hover:text-gold-700">
+                            <TextLink
+                                href={redirectTo ? register({ query: { redirectTo } }).url : register()}
+                                tabIndex={5}
+                                className="text-gold-600 hover:text-gold-700"
+                            >
                                 Sign up
                             </TextLink>
                         </div>

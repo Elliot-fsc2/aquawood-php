@@ -69,7 +69,7 @@ class BookingController extends Controller
     }
 
     /**
-     * Show the category selection page for a new booking.
+     * Show the category selection page for a new booking (authenticated).
      */
     public function create(): Response
     {
@@ -85,6 +85,22 @@ class BookingController extends Controller
     }
 
     /**
+     * Show the category selection page (public, no auth required).
+     */
+    public function publicCreate(): Response
+    {
+        $categories = RoomCategory::with('floor')
+            ->withCount(['rooms as available_rooms_count' => fn ($q) => $q->where('status', RoomStatusEnum::Available->value)])
+            ->get()
+            ->filter(fn ($category) => $category->available_rooms_count > 0)
+            ->values();
+
+        return Inertia::render('bookings/public-create', [
+            'categories' => $categories,
+        ]);
+    }
+
+    /**
      * Show the confirmation page before finalizing the booking.
      */
     public function confirm(Request $request): Response|RedirectResponse
@@ -94,6 +110,8 @@ class BookingController extends Controller
             'check_in' => ['required', 'date', 'after_or_equal:today'],
             'check_out' => ['required', 'date', 'after:check_in'],
             'notes' => ['nullable', 'string', 'max:1000'],
+            'adults' => ['nullable', 'integer', 'min:1', 'max:20'],
+            'children' => ['nullable', 'integer', 'min:0', 'max:20'],
         ]);
 
         $checkIn = Carbon::parse($validated['check_in']);
@@ -121,11 +139,42 @@ class BookingController extends Controller
 
         $category = RoomCategory::with('floor')->findOrFail($validated['category_id']);
 
+        $checkIn = Carbon::parse($validated['check_in']);
+        $checkOut = Carbon::parse($validated['check_out']);
+        $nights = $checkIn->diffInDays($checkOut);
+        $baseRate = (float) $category->base_price;
+        $subtotal = $baseRate * $nights;
+        $taxRate = 0.12;
+        $tax = $subtotal * $taxRate;
+        $grandTotal = $subtotal + $tax;
+
+        $user = $request->user();
+        $guest = $user?->guest;
+
         return Inertia::render('bookings/confirm', [
             'category' => $category,
             'check_in' => $validated['check_in'],
             'check_out' => $validated['check_out'],
             'notes' => $validated['notes'] ?? null,
+            'adults' => (int) ($validated['adults'] ?? 1),
+            'children' => (int) ($validated['children'] ?? 0),
+            'pricing' => [
+                'nights' => $nights,
+                'base_rate' => $baseRate,
+                'subtotal' => round($subtotal, 2),
+                'tax_rate' => $taxRate,
+                'tax' => round($tax, 2),
+                'grand_total' => round($grandTotal, 2),
+            ],
+            'guest' => $guest ? [
+                'name' => $user->name,
+                'email' => $user->email,
+                'phone' => $guest->phone,
+            ] : [
+                'name' => $user->name,
+                'email' => $user->email,
+                'phone' => null,
+            ],
         ]);
     }
 

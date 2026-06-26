@@ -140,7 +140,7 @@ export default function BookingsIndex({ bookings }: Props) {
                                             </div>
                                             <div className="shrink-0 text-right">
                                                 <div className="text-sm font-semibold">
-                                                    ${parseFloat(booking.total_price).toFixed(2)}
+                                                    ₱{parseFloat(booking.total_price).toFixed(2)}
                                                 </div>
                                             </div>
                                         </button>
@@ -198,7 +198,7 @@ export default function BookingsIndex({ bookings }: Props) {
                                     </div>
                                     <div>
                                         <span className="text-xs text-muted-foreground">Category Rate</span>
-                                        <p className="font-medium">${parseFloat(selectedBooking.room.category.base_price).toFixed(2)}/night</p>
+                                        <p className="font-medium">₱{parseFloat(selectedBooking.room.category.base_price).toFixed(2)}/night</p>
                                     </div>
                                 </div>
 
@@ -243,7 +243,7 @@ export default function BookingsIndex({ bookings }: Props) {
                                 <div className="flex items-center justify-between text-sm">
                                     <span className="text-muted-foreground">Total Price</span>
                                     <span className="text-lg font-bold">
-                                        ${parseFloat(selectedBooking.total_price).toFixed(2)}
+                                        ₱{parseFloat(selectedBooking.total_price).toFixed(2)}
                                     </span>
                                 </div>
 

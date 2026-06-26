@@ -1,15 +1,15 @@
-import { useMemo } from 'react';
-import { Head, Link, useForm } from '@inertiajs/react';
-import { store as bookingsStore } from '@/routes/bookings';
-import { ArrowLeft, BedDouble, CalendarDays, LoaderCircle, Users } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { Head, Link, useForm, router } from '@inertiajs/react';
+import { store as bookingsStore, index as bookingsIndex } from '@/routes/bookings';
+import { create as bookingsCreate } from '@/routes/bookings';
+import { ArrowLeft, BedDouble, CalendarDays, CheckCircle2, LoaderCircle, Mail, Phone, User, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import InputError from '@/components/input-error';
 import BookingSteps from '@/components/booking-steps';
-import { create as bookingsCreate, index as bookingsIndex } from '@/routes/bookings';
-import { dashboard } from '@/routes';
 
 interface Floor {
     id: number;
@@ -26,14 +26,35 @@ interface Category {
     floor: Floor | null;
 }
 
+interface Pricing {
+    nights: number;
+    base_rate: number;
+    subtotal: number;
+    tax_rate: number;
+    tax: number;
+    grand_total: number;
+}
+
+interface GuestInfo {
+    name: string;
+    email: string;
+    phone: string | null;
+}
+
 interface Props {
     category: Category;
     check_in: string;
     check_out: string;
     notes: string | null;
+    adults: number;
+    children: number;
+    pricing: Pricing;
+    guest: GuestInfo;
 }
 
-export default function BookingsConfirm({ category, check_in, check_out, notes }: Props) {
+export default function BookingsConfirm({ category, check_in, check_out, notes, adults, children, pricing, guest }: Props) {
+    const [showSuccess, setShowSuccess] = useState(false);
+
     const { post, processing, errors } = useForm({
         room_category_id: category.id,
         check_in_date: check_in,
@@ -41,24 +62,30 @@ export default function BookingsConfirm({ category, check_in, check_out, notes }
         notes: notes ?? '',
     });
 
-    const totalPreview = useMemo(() => {
-        const checkIn = new Date(check_in);
-        const checkOut = new Date(check_out);
-        const diffTime = checkOut.getTime() - checkIn.getTime();
-        const nights = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
-        if (nights <= 0) return null;
-        return {
-            nights,
-            total: nights * parseFloat(category.base_price),
-        };
-    }, [category.base_price, check_in, check_out]);
-
     const handleConfirm = (e: React.FormEvent) => {
         e.preventDefault();
         post(bookingsStore().url, {
             preserveScroll: true,
+            onSuccess: () => {
+                setShowSuccess(true);
+            },
         });
     };
+
+    const handleViewBookings = () => {
+        router.visit(bookingsIndex().url);
+    };
+
+    const formatDate = (dateStr: string) => {
+        return new Date(dateStr).toLocaleDateString('en-US', {
+            weekday: 'short',
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+        });
+    };
+
+    const totalGuests = adults + children;
 
     return (
         <>
@@ -83,9 +110,10 @@ export default function BookingsConfirm({ category, check_in, check_out, notes }
                 <BookingSteps currentStep="confirm" categorySelected datesSelected />
 
                 <form onSubmit={handleConfirm}>
-                    <div className="grid gap-6 md:grid-cols-3">
-                        {/* Category Preview */}
-                        <div className="md:col-span-1">
+                    <div className="grid gap-6 lg:grid-cols-3">
+                        {/* Left Column: Category + Guest Info */}
+                        <div className="space-y-6 lg:col-span-1">
+                            {/* Category Card */}
                             <Card>
                                 <CardHeader>
                                     <CardTitle>{category.name}</CardTitle>
@@ -96,11 +124,11 @@ export default function BookingsConfirm({ category, check_in, check_out, notes }
                                             <img
                                                 src={'/storage/' + category.image}
                                                 alt={category.name}
-                                                className="h-48 w-full object-cover md:h-56"
+                                                className="h-48 w-full object-cover md:h-48"
                                             />
                                         </div>
                                     ) : (
-                                        <div className="flex h-48 items-center justify-center rounded-lg border bg-muted text-muted-foreground/40 md:h-56">
+                                        <div className="flex h-48 items-center justify-center rounded-lg border bg-muted text-muted-foreground/40">
                                             <BedDouble className="h-12 w-12" />
                                         </div>
                                     )}
@@ -117,6 +145,10 @@ export default function BookingsConfirm({ category, check_in, check_out, notes }
                                                 {category.capacity} guests
                                             </span>
                                         </div>
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-muted-foreground">Guests</span>
+                                            <span>{totalGuests} ({adults} Adult{adults !== 1 ? 's' : ''}{children > 0 ? `, ${children} Child${children !== 1 ? 'ren' : ''}` : ''})</span>
+                                        </div>
                                         {category.amenities && category.amenities.length > 0 && (
                                             <div className="flex flex-wrap gap-1 pt-1">
                                                 {category.amenities.map((amenity, i) => (
@@ -129,44 +161,74 @@ export default function BookingsConfirm({ category, check_in, check_out, notes }
                                     </div>
                                 </CardContent>
                             </Card>
+
+                            {/* Guest Information Card */}
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle className="flex items-center gap-2">
+                                        <User className="h-4 w-4" />
+                                        Guest Information
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-3 text-sm">
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary">
+                                            <User className="h-4 w-4" />
+                                        </div>
+                                        <div>
+                                            <div className="text-xs text-muted-foreground">Name</div>
+                                            <div className="font-medium">{guest.name}</div>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary">
+                                            <Mail className="h-4 w-4" />
+                                        </div>
+                                        <div>
+                                            <div className="text-xs text-muted-foreground">Email</div>
+                                            <div className="font-medium">{guest.email}</div>
+                                        </div>
+                                    </div>
+                                    {guest.phone && (
+                                        <div className="flex items-center gap-3">
+                                            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary">
+                                                <Phone className="h-4 w-4" />
+                                            </div>
+                                            <div>
+                                                <div className="text-xs text-muted-foreground">Phone</div>
+                                                <div className="font-medium">{guest.phone}</div>
+                                            </div>
+                                        </div>
+                                    )}
+                                </CardContent>
+                            </Card>
                         </div>
 
-                        {/* Booking Details */}
-                        <div className="md:col-span-2">
+                        {/* Right Column: Dates + Pricing */}
+                        <div className="space-y-6 lg:col-span-2">
+                            {/* Dates */}
                             <Card>
                                 <CardHeader>
                                     <CardTitle>Reservation Details</CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-5">
-                                    {/* Dates */}
                                     <div className="grid gap-4 sm:grid-cols-2">
                                         <div className="rounded-lg border bg-muted/30 p-4">
                                             <div className="text-xs text-muted-foreground">Check-in</div>
                                             <div className="mt-1 flex items-center gap-2 text-lg font-semibold">
                                                 <CalendarDays className="h-5 w-5 text-primary" />
-                                                {new Date(check_in).toLocaleDateString('en-US', {
-                                                    weekday: 'short',
-                                                    month: 'short',
-                                                    day: 'numeric',
-                                                    year: 'numeric',
-                                                })}
+                                                {formatDate(check_in)}
                                             </div>
                                         </div>
                                         <div className="rounded-lg border bg-muted/30 p-4">
                                             <div className="text-xs text-muted-foreground">Check-out</div>
                                             <div className="mt-1 flex items-center gap-2 text-lg font-semibold">
                                                 <CalendarDays className="h-5 w-5 text-primary" />
-                                                {new Date(check_out).toLocaleDateString('en-US', {
-                                                    weekday: 'short',
-                                                    month: 'short',
-                                                    day: 'numeric',
-                                                    year: 'numeric',
-                                                })}
+                                                {formatDate(check_out)}
                                             </div>
                                         </div>
                                     </div>
 
-                                    {/* Room assignment note */}
                                     <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 text-sm">
                                         <p className="font-medium text-primary">Room assigned on confirmation</p>
                                         <p className="mt-1 text-muted-foreground">
@@ -175,25 +237,29 @@ export default function BookingsConfirm({ category, check_in, check_out, notes }
                                         </p>
                                     </div>
 
-                                    {/* Price Summary */}
-                                    {totalPreview && (
-                                        <div className="rounded-lg border p-4">
-                                            <h4 className="mb-3 text-sm font-medium">Price Summary</h4>
-                                            <div className="space-y-2 text-sm">
-                                                <div className="flex items-center justify-between">
-                                                    <span className="text-muted-foreground">
-                                                        ${parseFloat(category.base_price).toFixed(2)} x {totalPreview.nights} night{totalPreview.nights !== 1 ? 's' : ''}
-                                                    </span>
-                                                    <span>${totalPreview.total.toFixed(2)}</span>
-                                                </div>
-                                                <Separator />
-                                                <div className="flex items-center justify-between font-semibold text-base">
-                                                    <span>Total</span>
-                                                    <span>${totalPreview.total.toFixed(2)}</span>
-                                                </div>
+                                    {/* Price Breakdown */}
+                                    <div className="rounded-lg border p-4">
+                                        <h4 className="mb-3 text-sm font-medium">Price Breakdown</h4>
+                                        <div className="space-y-2 text-sm">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-muted-foreground">
+                                                    ₱{pricing.base_rate.toFixed(2)} x {pricing.nights} night{pricing.nights !== 1 ? 's' : ''}
+                                                </span>
+                                                <span>₱{pricing.subtotal.toFixed(2)}</span>
+                                            </div>
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-muted-foreground">
+                                                    VAT ({(pricing.tax_rate * 100).toFixed(0)}%)
+                                                </span>
+                                                <span>₱{pricing.tax.toFixed(2)}</span>
+                                            </div>
+                                            <Separator />
+                                            <div className="flex items-center justify-between font-semibold text-base">
+                                                <span>Grand Total</span>
+                                                <span className="text-lg text-primary">₱{pricing.grand_total.toFixed(2)}</span>
                                             </div>
                                         </div>
-                                    )}
+                                    </div>
 
                                     {/* Notes */}
                                     {notes && (
@@ -207,7 +273,7 @@ export default function BookingsConfirm({ category, check_in, check_out, notes }
 
                                     <Button type="submit" disabled={processing} className="w-full" size="lg">
                                         {processing && <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />}
-                                        Confirm Booking
+                                        Confirm & Book
                                     </Button>
                                 </CardContent>
                             </Card>
@@ -215,6 +281,46 @@ export default function BookingsConfirm({ category, check_in, check_out, notes }
                     </div>
                 </form>
             </div>
+
+            {/* Success Dialog */}
+            <Dialog open={showSuccess} onOpenChange={setShowSuccess}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <div className="mx-auto mb-2 flex h-14 w-14 items-center justify-center rounded-full bg-green-100">
+                            <CheckCircle2 className="h-8 w-8 text-green-600" />
+                        </div>
+                        <DialogTitle className="text-center text-xl">Booking Successful!</DialogTitle>
+                        <DialogDescription className="text-center">
+                            Your reservation has been created successfully. You'll receive a confirmation
+                            email with your booking details.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-3">
+                        <div className="rounded-lg border bg-muted/30 p-3 text-sm">
+                            <div className="flex items-center justify-between">
+                                <span className="text-muted-foreground">Category</span>
+                                <span className="font-medium">{category.name}</span>
+                            </div>
+                            <div className="mt-1 flex items-center justify-between">
+                                <span className="text-muted-foreground">Check-in</span>
+                                <span className="font-medium">{formatDate(check_in)}</span>
+                            </div>
+                            <div className="mt-1 flex items-center justify-between">
+                                <span className="text-muted-foreground">Check-out</span>
+                                <span className="font-medium">{formatDate(check_out)}</span>
+                            </div>
+                            <Separator className="my-2" />
+                            <div className="flex items-center justify-between font-semibold">
+                                <span>Total Paid</span>
+                                <span className="text-primary">₱{pricing.grand_total.toFixed(2)}</span>
+                            </div>
+                        </div>
+                        <Button onClick={handleViewBookings} className="w-full">
+                            View My Bookings
+                        </Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </>
     );
 }
@@ -222,16 +328,12 @@ export default function BookingsConfirm({ category, check_in, check_out, notes }
 BookingsConfirm.layout = {
     breadcrumbs: [
         {
-            title: 'Dashboard',
-            href: dashboard(),
-        },
-        {
             title: 'Bookings',
             href: bookingsIndex(),
         },
         {
             title: 'Confirm Booking',
-            href: dashboard(),
+            href: bookingsIndex(),
         },
     ],
 };

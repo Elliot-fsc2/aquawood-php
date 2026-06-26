@@ -271,7 +271,7 @@ export default function AdminBookingsIndex({ bookings, stats, selectedStatus }: 
                                                     </Badge>
                                                 </td>
                                                 <td className="py-3 px-4 text-right font-mono font-medium">
-                                                    ${parseFloat(booking.total_price).toFixed(2)}
+                                                    ₱{parseFloat(booking.total_price).toFixed(2)}
                                                 </td>
                                                 <td className="py-3 px-4 text-center">
                                                     <Button
@@ -387,7 +387,7 @@ export default function AdminBookingsIndex({ bookings, stats, selectedStatus }: 
                                         <div className="flex items-center justify-between">
                                             <span className="text-muted-foreground">Rate</span>
                                             <span className="font-medium">
-                                                ${parseFloat(detailModal.booking.room?.base_rate ?? '0').toFixed(2)}{' '}
+                                                ₱{parseFloat(detailModal.booking.room?.base_rate ?? '0').toFixed(2)}{' '}
                                                 /night
                                             </span>
                                         </div>
@@ -427,7 +427,7 @@ export default function AdminBookingsIndex({ bookings, stats, selectedStatus }: 
                                         <div className="flex items-center justify-between">
                                             <span className="text-muted-foreground">Total</span>
                                             <span className="font-mono font-semibold text-base">
-                                                ${parseFloat(detailModal.booking.total_price).toFixed(2)}
+                                                ₱{parseFloat(detailModal.booking.total_price).toFixed(2)}
                                             </span>
                                         </div>
                                     </div>

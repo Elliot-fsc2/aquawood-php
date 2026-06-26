@@ -135,7 +135,7 @@ export default function CategoriesIndex({ categories, floors, selectedFloor }: P
                                                 {category.floor?.name ?? '—'}
                                             </td>
                                             <td className="py-3 px-4 text-right font-mono">
-                                                ${parseFloat(category.base_price).toFixed(2)}
+                                                ₱{parseFloat(category.base_price).toFixed(2)}
                                             </td>
                                             <td className="py-3 px-4 text-center">
                                                 {category.capacity}

@@ -277,7 +277,7 @@ export default function AdminGuestsIndex({ guests, filters }: Props) {
                                                 </span>
                                             </td>
                                             <td className="py-3 px-4 text-right font-mono">
-                                                ${parseFloat(guest.total_spent || '0').toFixed(2)}
+                                                ₱{parseFloat(guest.total_spent || '0').toFixed(2)}
                                             </td>
                                             <td className="py-3 px-4 text-center">
                                                 {guest.is_suspended ? (

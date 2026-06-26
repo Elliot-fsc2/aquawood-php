@@ -1,7 +1,8 @@
-﻿import { useMemo, useRef, useState, useEffect, useCallback } from 'react';
-import { Head, Link, useForm } from '@inertiajs/react';
+import { useMemo, useRef, useState, useEffect, useCallback } from 'react';
+import { Head, Link, useForm, usePage, router } from '@inertiajs/react';
 import { confirm as bookingsConfirm, checkAvailability } from '@/routes/bookings';
-import { ArrowLeft, BedDouble, CheckCircle2, LoaderCircle, TriangleAlert, Users, XCircle } from 'lucide-react';
+import { login, register } from '@/routes';
+import { ArrowLeft, BedDouble, CheckCircle2, LoaderCircle, TriangleAlert, Users, XCircle, Minus, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,8 +12,7 @@ import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import InputError from '@/components/input-error';
 import BookingSteps from '@/components/booking-steps';
-import { index as bookingsIndex } from '@/routes/bookings';
-import { dashboard } from '@/routes';
+import { home } from '@/routes';
 
 interface Floor {
     id: number;
@@ -34,7 +34,9 @@ interface Props {
     categories: Category[];
 }
 
-export default function BookingsCreate({ categories }: Props) {
+export default function BookingsPublicCreate({ categories }: Props) {
+    const { auth } = usePage().props;
+    const isAuthenticated = !!auth?.user;
     const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
     const [isCheckingAvailability, setIsCheckingAvailability] = useState(false);
     const [availabilityResult, setAvailabilityResult] = useState<{
@@ -51,14 +53,14 @@ export default function BookingsCreate({ categories }: Props) {
         dates: '',
     });
 
+    const [guestCount, setGuestCount] = useState({ adults: 1, children: 0 });
+
     const selectedCategory = categories.find((c) => c.id === selectedCategoryId);
 
-    // Clear availability when category changes
     useEffect(() => {
         setAvailabilityResult(null);
     }, [selectedCategoryId]);
 
-    // Debounced availability check
     const checkDateAvailability = useCallback(
         async (categoryId: number, checkIn: string, checkOut: string) => {
             if (!checkIn || !checkOut) return;
@@ -86,14 +88,12 @@ export default function BookingsCreate({ categories }: Props) {
 
     const handleDateChange = useCallback(
         (field: 'check_in_date' | 'check_out_date', value: string) => {
-            // When check-in changes, reset check-out so the user picks a valid range
             if (field === 'check_in_date') {
                 setData('check_out_date', '');
             }
 
             setData(field, value);
 
-            // Immediately clear old results so users don't see stale data
             setAvailabilityResult(null);
             setIsCheckingAvailability(true);
 
@@ -115,7 +115,6 @@ export default function BookingsCreate({ categories }: Props) {
         [selectedCategoryId, data.check_in_date, data.check_out_date, setData, checkDateAvailability],
     );
 
-    // Cleanup timer on unmount
     useEffect(() => {
         return () => {
             if (availabilityTimer.current) {
@@ -151,6 +150,23 @@ export default function BookingsCreate({ categories }: Props) {
     const handleContinue = () => {
         if (!canContinue) return;
 
+        if (!isAuthenticated) {
+            const confirmUrl = bookingsConfirm({
+                query: {
+                    category_id: String(selectedCategoryId),
+                    check_in: data.check_in_date,
+                    check_out: data.check_out_date,
+                    notes: data.notes,
+                    adults: String(guestCount.adults),
+                    children: String(guestCount.children),
+                },
+            }).url;
+
+            router.visit(login({ query: { redirectTo: confirmUrl } }).url);
+
+            return;
+        }
+
         get(
             bookingsConfirm({
                 query: {
@@ -158,6 +174,8 @@ export default function BookingsCreate({ categories }: Props) {
                     check_in: data.check_in_date,
                     check_out: data.check_out_date,
                     notes: data.notes,
+                    adults: String(guestCount.adults),
+                    children: String(guestCount.children),
                 },
             }).url,
         );
@@ -166,14 +184,12 @@ export default function BookingsCreate({ categories }: Props) {
     const handleCategoryClick = (categoryId: number) => {
         setSelectedCategoryId(categoryId);
 
-        // Trigger availability check if dates are already filled
         if (data.check_in_date && data.check_out_date && new Date(data.check_in_date) < new Date(data.check_out_date)) {
             setAvailabilityResult(null);
             setIsCheckingAvailability(true);
             checkDateAvailability(categoryId, data.check_in_date, data.check_out_date);
         }
 
-        // Auto-scroll to the date panel after selection
         setTimeout(() => {
             datePanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }, 100);
@@ -181,17 +197,18 @@ export default function BookingsCreate({ categories }: Props) {
 
     return (
         <>
-            <Head title="New Booking" />
+            <Head title="Browse Rooms" />
 
-            <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-4">
-                <div className="flex items-center gap-4">
-                    <Link href={bookingsIndex()}>
+            <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+                {/* Header */}
+                <div className="mb-8 flex items-center gap-4">
+                    <Link href={home()}>
                         <Button variant="ghost" size="icon" className="h-9 w-9">
                             <ArrowLeft className="h-5 w-5" />
                         </Button>
                     </Link>
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight">New Booking</h1>
+                        <h1 className="text-2xl font-bold tracking-tight">Browse Rooms</h1>
                         <p className="text-sm text-muted-foreground">
                             Select a room category and your preferred dates
                         </p>
@@ -206,7 +223,7 @@ export default function BookingsCreate({ categories }: Props) {
                 />
 
                 {/* Category Grid */}
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                     {categories.map((cat) => {
                         const isSelected = selectedCategoryId === cat.id;
 
@@ -221,7 +238,6 @@ export default function BookingsCreate({ categories }: Props) {
                                         : 'border-border hover:border-primary/50 hover:shadow-sm'
                                 }`}
                             >
-                                {/* Image */}
                                 <div className="aspect-[4/3] overflow-hidden bg-muted">
                                     {cat.image ? (
                                         <img
@@ -236,7 +252,6 @@ export default function BookingsCreate({ categories }: Props) {
                                     )}
                                 </div>
 
-                                {/* Overlay badge for availability */}
                                 <div className="absolute right-2 top-2">
                                     <Badge
                                         variant={cat.available_rooms_count > 0 ? 'default' : 'destructive'}
@@ -248,7 +263,6 @@ export default function BookingsCreate({ categories }: Props) {
                                     </Badge>
                                 </div>
 
-                                {/* Details */}
                                 <div className="space-y-1.5 p-3">
                                     <h3 className="font-semibold leading-tight">{cat.name}</h3>
                                     <div className="flex items-center gap-3 text-xs text-muted-foreground">
@@ -264,7 +278,7 @@ export default function BookingsCreate({ categories }: Props) {
                                         </span>
                                         <span className="text-xs text-muted-foreground">/night</span>
                                     </div>
-                                    {cat.amenities && cat.amenities.length > 0 && (
+                                    {Array.isArray(cat.amenities) && cat.amenities.length > 0 && (
                                         <div className="flex flex-wrap gap-1 pt-1">
                                             {cat.amenities.slice(0, 3).map((amenity, i) => (
                                                 <Badge key={i} variant="secondary" className="text-[10px]">
@@ -293,7 +307,7 @@ export default function BookingsCreate({ categories }: Props) {
 
                 {/* Date Selection Panel */}
                 {selectedCategory && (
-                    <div ref={datePanelRef} className="rounded-xl border bg-card p-5">
+                    <div ref={datePanelRef} className="mt-8 rounded-xl border bg-card p-5">
                         <div className="grid gap-6 md:grid-cols-2">
                             {/* Left: Selected category summary */}
                             <div className="space-y-3">
@@ -321,7 +335,7 @@ export default function BookingsCreate({ categories }: Props) {
                                 </div>
                             </div>
 
-                            {/* Right: Dates + Notes */}
+                            {/* Right: Dates + Guests + Notes */}
                             <div className="space-y-4">
                                 <div className="grid grid-cols-2 gap-3">
                                     <div className="space-y-2">
@@ -349,7 +363,7 @@ export default function BookingsCreate({ categories }: Props) {
 
                                     {/* Availability Indicator */}
                                     {selectedCategoryId && areDatesValid && (
-                                        <div className="min-h-[2rem]">
+                                        <div className="min-h-[2rem] col-span-2">
                                             {isCheckingAvailability ? (
                                                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                                     <LoaderCircle className="h-4 w-4 animate-spin" />
@@ -385,6 +399,65 @@ export default function BookingsCreate({ categories }: Props) {
                                             )}
                                         </div>
                                     )}
+                                </div>
+
+                                {/* Guest Count */}
+                                <div className="space-y-3">
+                                    <Label>Guests</Label>
+                                    <div className="flex items-center gap-6">
+                                        <div className="flex items-center gap-3">
+                                            <span className="text-sm">Adults</span>
+                                            <div className="flex items-center gap-1">
+                                                <Button
+                                                    type="button"
+                                                    variant="outline"
+                                                    size="icon"
+                                                    className="h-8 w-8"
+                                                    onClick={() => setGuestCount((g) => ({ ...g, adults: Math.max(1, g.adults - 1) }))}
+                                                    disabled={guestCount.adults <= 1}
+                                                >
+                                                    <Minus className="h-3 w-3" />
+                                                </Button>
+                                                <span className="w-6 text-center text-sm font-medium">{guestCount.adults}</span>
+                                                <Button
+                                                    type="button"
+                                                    variant="outline"
+                                                    size="icon"
+                                                    className="h-8 w-8"
+                                                    onClick={() => setGuestCount((g) => ({ ...g, adults: Math.min(g.adults + 1, selectedCategory?.capacity ?? 10) }))}
+                                                    disabled={guestCount.adults >= (selectedCategory?.capacity ?? 10)}
+                                                >
+                                                    <Plus className="h-3 w-3" />
+                                                </Button>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                            <span className="text-sm">Children</span>
+                                            <div className="flex items-center gap-1">
+                                                <Button
+                                                    type="button"
+                                                    variant="outline"
+                                                    size="icon"
+                                                    className="h-8 w-8"
+                                                    onClick={() => setGuestCount((g) => ({ ...g, children: Math.max(0, g.children - 1) }))}
+                                                    disabled={guestCount.children <= 0}
+                                                >
+                                                    <Minus className="h-3 w-3" />
+                                                </Button>
+                                                <span className="w-6 text-center text-sm font-medium">{guestCount.children}</span>
+                                                <Button
+                                                    type="button"
+                                                    variant="outline"
+                                                    size="icon"
+                                                    className="h-8 w-8"
+                                                    onClick={() => setGuestCount((g) => ({ ...g, children: Math.min(g.children + 1, 10) }))}
+                                                    disabled={guestCount.children >= 10}
+                                                >
+                                                    <Plus className="h-3 w-3" />
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div className="space-y-2">
@@ -426,7 +499,7 @@ export default function BookingsCreate({ categories }: Props) {
                                     className="w-full"
                                 >
                                     {processing && <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />}
-                                    Continue to Confirmation
+                                    {isAuthenticated ? 'Continue to Confirmation' : 'Proceed to Booking'}
                                 </Button>
                             </div>
                         </div>
@@ -436,20 +509,3 @@ export default function BookingsCreate({ categories }: Props) {
         </>
     );
 }
-
-BookingsCreate.layout = {
-    breadcrumbs: [
-        {
-            title: 'Dashboard',
-            href: dashboard(),
-        },
-        {
-            title: 'Bookings',
-            href: bookingsIndex(),
-        },
-        {
-            title: 'New Booking',
-            href: dashboard(),
-        },
-    ],
-};

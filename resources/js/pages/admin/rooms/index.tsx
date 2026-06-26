@@ -117,7 +117,7 @@ export default function RoomsIndex({ rooms }: Props) {
                                                 {room.category?.name ?? '—'}
                                             </td>
                                             <td className="py-3 px-4 text-right font-mono">
-                                                ${parseFloat(room.base_rate).toFixed(2)}
+                                                ₱{parseFloat(room.base_rate).toFixed(2)}
                                             </td>
                                             <td className="py-3 px-4 text-center">
                                                 {room.capacity}

@@ -11,9 +11,10 @@ import { store } from '@/routes/register';
 
 type Props = {
     passwordRules: string;
+    redirectTo?: string | null;
 };
 
-export default function Register({ passwordRules }: Props) {
+export default function Register({ passwordRules, redirectTo }: Props) {
     return (
         <>
             <Head title="Register" />
@@ -25,6 +26,10 @@ export default function Register({ passwordRules }: Props) {
             >
                 {({ processing, errors }) => (
                     <>
+                        {redirectTo && (
+                            <input type="hidden" name="redirectTo" value={redirectTo} />
+                        )}
+
                         <div className="grid gap-6">
                             <div className="grid gap-2">
                                 <Label htmlFor="name" className="text-brand-700">
@@ -113,7 +118,7 @@ export default function Register({ passwordRules }: Props) {
 
                         <div className="text-center text-sm text-brand-700/60">
                             Already have an account?{' '}
-                            <TextLink href={login()} tabIndex={6} className="text-gold-600 hover:text-gold-700">
+                            <TextLink href={redirectTo ? login({ query: { redirectTo } }).url : login()} tabIndex={6} className="text-gold-600 hover:text-gold-700">
                                 Log in
                             </TextLink>
                         </div>
