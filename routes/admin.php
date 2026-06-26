@@ -34,4 +34,5 @@ Route::middleware(['auth', 'role:'.RoleEnum::Admin->value])->prefix('admin')->na
 
     // Bookings
     Route::get('bookings', [BookingController::class, 'adminIndex'])->name('bookings.index');
+    Route::patch('bookings/{reservation}/status', [BookingController::class, 'adminUpdateStatus'])->name('bookings.update-status');
 });

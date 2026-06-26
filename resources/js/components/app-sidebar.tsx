@@ -1,6 +1,6 @@
 import { Link } from '@inertiajs/react';
 import { usePage } from '@inertiajs/react';
-import { BedDouble, BookOpen, Building2, LayoutGrid, Leaf, Tag } from 'lucide-react';
+import { BedDouble, BookOpen, Building2, CalendarCheck, LayoutGrid, Leaf, Tag } from 'lucide-react';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -15,6 +15,7 @@ import {
     useSidebar,
 } from '@/components/ui/sidebar';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { index as adminBookingsIndex } from '@/routes/admin/bookings';
 import { index as adminCategoriesIndex } from '@/routes/admin/categories';
 import { index as adminFloorsIndex } from '@/routes/admin/floors';
 import { index as adminRoomsIndex } from '@/routes/admin/rooms';
@@ -49,6 +50,11 @@ export function AppSidebar() {
     ];
 
     const adminNavItems: NavItem[] = [
+        {
+            title: 'Reservations',
+            href: adminBookingsIndex(),
+            icon: CalendarCheck,
+        },
         {
             title: 'Floors',
             href: adminFloorsIndex(),

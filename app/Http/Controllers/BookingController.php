@@ -11,9 +11,11 @@ use App\Models\Reservation;
 use App\Models\Room;
 use App\Models\RoomCategory;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -149,6 +151,96 @@ class BookingController extends Controller
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Booking created.')]);
 
         return to_route('bookings.index');
+    }
+
+    /**
+     * The allowed status transitions for reservations.
+     *
+     * @var array<string, list<string>>
+     */
+    protected array $statusTransitions = [
+        'pending' => ['confirmed', 'cancelled'],
+        'confirmed' => ['checked_in', 'cancelled'],
+        'checked_in' => ['checked_out'],
+        'checked_out' => [],
+        'cancelled' => [],
+    ];
+
+    /**
+     * Update the status of a reservation (admin only).
+     */
+    public function adminUpdateStatus(Request $request, Reservation $reservation): RedirectResponse
+    {
+        $validated = $request->validate([
+            'status' => ['required', 'string', Rule::in(array_map(fn ($case) => $case->value, ReservationStatusEnum::cases()))],
+        ]);
+
+        $newStatus = ReservationStatusEnum::tryFrom($validated['status']);
+        $currentStatusValue = $reservation->status instanceof ReservationStatusEnum
+            ? $reservation->status->value
+            : $reservation->status;
+
+        // Validate the transition is allowed
+        $allowed = $this->statusTransitions[$currentStatusValue] ?? [];
+        if (! in_array($newStatus->value, $allowed)) {
+            return back()->withErrors([
+                'status' => 'Cannot change status from '.($reservation->status->label() ?? $currentStatusValue).' to '.$newStatus->label().'.',
+            ]);
+        }
+
+        // If cancelling, use the CancelBookingAction for proper room cleanup
+        if ($newStatus === ReservationStatusEnum::Cancelled && $reservation->status !== ReservationStatusEnum::Cancelled) {
+            try {
+                app(CancelBookingAction::class)->cancel($reservation);
+            } catch (\RuntimeException $e) {
+                return back()->withErrors(['status' => $e->getMessage()]);
+            }
+
+            Inertia::flash('toast', ['type' => 'success', 'message' => __('Reservation cancelled.')]);
+
+            return back();
+        }
+
+        // For other status changes, just update
+        $reservation->update(['status' => $newStatus]);
+
+        // If the reservation is reaching a terminal state, free the room
+        if (! $newStatus->canBeCancelled()) {
+            $reservation->room->update(['status' => RoomStatusEnum::Available->value]);
+        }
+
+        Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => __('Reservation status updated to :status.', ['status' => $newStatus->label()]),
+        ]);
+
+        return back();
+    }
+
+    /**
+     * Display a listing of all bookings for admin.
+     */
+    public function adminIndex(Request $request): Response
+    {
+        $bookings = Reservation::with('guest', 'room.floor', 'room.category')
+            ->when($request->filled('status'), fn (Builder $q) => $q->where('status', $request->status))
+            ->latest()
+            ->get();
+
+        $stats = [
+            'total' => Reservation::count(),
+            'pending' => Reservation::where('status', ReservationStatusEnum::Pending)->count(),
+            'confirmed' => Reservation::where('status', ReservationStatusEnum::Confirmed)->count(),
+            'checked_in' => Reservation::where('status', ReservationStatusEnum::CheckedIn)->count(),
+            'checked_out' => Reservation::where('status', ReservationStatusEnum::CheckedOut)->count(),
+            'cancelled' => Reservation::where('status', ReservationStatusEnum::Cancelled)->count(),
+        ];
+
+        return Inertia::render('admin/bookings/index', [
+            'bookings' => $bookings,
+            'stats' => $stats,
+            'selectedStatus' => $request->status,
+        ]);
     }
 
     /**
