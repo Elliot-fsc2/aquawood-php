@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { Head, Link, useForm, router } from '@inertiajs/react';
 import { store as bookingsStore, index as bookingsIndex } from '@/routes/bookings';
 import { create as bookingsCreate } from '@/routes/bookings';
+import { dashboard } from '@/routes';
 import { ArrowLeft, BedDouble, CalendarDays, CheckCircle2, LoaderCircle, Mail, Phone, User, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';

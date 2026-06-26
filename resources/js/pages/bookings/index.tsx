@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
-import { create as bookingsCreate, cancel as bookingsCancel } from '@/routes/bookings';
+import { create as bookingsCreate, index as bookingsIndex, cancel as bookingsCancel } from '@/routes/bookings';
 import { CalendarDays, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';

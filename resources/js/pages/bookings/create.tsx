@@ -2,6 +2,8 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import { confirm as bookingsConfirm, checkAvailability } from '@/routes/bookings';
 import { ArrowLeft, BedDouble, CheckCircle2, LoaderCircle, TriangleAlert, Users, XCircle } from 'lucide-react';
+import type { DateRange } from 'react-day-picker';
+import { DateRangePicker } from '@/components/date-range-picker';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -41,6 +43,7 @@ export default function BookingsCreate({ categories }: Props) {
         available: boolean;
         available_rooms: number;
     } | null>(null);
+    const [dateRange, setDateRange] = useState<DateRange | undefined>();
     const availabilityTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
     const datePanelRef = useRef<HTMLDivElement | null>(null);
 
@@ -52,6 +55,8 @@ export default function BookingsCreate({ categories }: Props) {
     });
 
     const selectedCategory = categories.find((c) => c.id === selectedCategoryId);
+
+    const toDateString = (date: Date) => date.toISOString().split('T')[0];
 
     // Clear availability when category changes
     useEffect(() => {
@@ -84,35 +89,29 @@ export default function BookingsCreate({ categories }: Props) {
         [],
     );
 
-    const handleDateChange = useCallback(
-        (field: 'check_in_date' | 'check_out_date', value: string) => {
-            // When check-in changes, reset check-out so the user picks a valid range
-            if (field === 'check_in_date') {
-                setData('check_out_date', '');
-            }
+    const handleRangeSelect = useCallback(
+        (range: DateRange | undefined) => {
+            setDateRange(range);
 
-            setData(field, value);
+            const checkIn = range?.from ? toDateString(range.from) : '';
+            const checkOut = range?.to ? toDateString(range.to) : '';
 
-            // Immediately clear old results so users don't see stale data
+            setData('check_in_date', checkIn);
+            setData('check_out_date', checkOut);
+
             setAvailabilityResult(null);
-            setIsCheckingAvailability(true);
 
-            if (availabilityTimer.current) {
-                clearTimeout(availabilityTimer.current);
-            }
-
-            availabilityTimer.current = setTimeout(() => {
-                const checkIn = field === 'check_in_date' ? value : data.check_in_date;
-                const checkOut = field === 'check_out_date' ? value : data.check_out_date;
-
-                if (selectedCategoryId && checkIn && checkOut && new Date(checkIn) < new Date(checkOut)) {
+            if (selectedCategoryId && checkIn && checkOut && new Date(checkIn) < new Date(checkOut)) {
+                setIsCheckingAvailability(true);
+                if (availabilityTimer.current) clearTimeout(availabilityTimer.current);
+                availabilityTimer.current = setTimeout(() => {
                     checkDateAvailability(selectedCategoryId, checkIn, checkOut);
-                } else {
-                    setIsCheckingAvailability(false);
-                }
-            }, 500);
+                }, 500);
+            } else {
+                setIsCheckingAvailability(false);
+            }
         },
-        [selectedCategoryId, data.check_in_date, data.check_out_date, setData, checkDateAvailability],
+        [selectedCategoryId, setData, checkDateAvailability],
     );
 
     // Cleanup timer on unmount
@@ -323,29 +322,13 @@ export default function BookingsCreate({ categories }: Props) {
 
                             {/* Right: Dates + Notes */}
                             <div className="space-y-4">
-                                <div className="grid grid-cols-2 gap-3">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="check_in_date">Check-in</Label>
-                                        <Input
-                                            id="check_in_date"
-                                            type="date"
-                                            value={data.check_in_date}
-                                            onChange={(e) => handleDateChange('check_in_date', e.target.value)}
-                                            min={new Date().toISOString().split('T')[0]}
-                                        />
-                                        <InputError message={errors.check_in_date} />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="check_out_date">Check-out</Label>
-                                        <Input
-                                            id="check_out_date"
-                                            type="date"
-                                            value={data.check_out_date}
-                                            onChange={(e) => handleDateChange('check_out_date', e.target.value)}
-                                            min={data.check_in_date || new Date().toISOString().split('T')[0]}
-                                        />
-                                        <InputError message={errors.check_out_date} />
-                                    </div>
+                            <div className="space-y-2">
+                                <Label>Check-in & Check-out</Label>
+                                <DateRangePicker
+                                    value={dateRange}
+                                    onChange={handleRangeSelect}
+                                    error={errors.check_in_date || errors.check_out_date}
+                                />
 
                                     {/* Availability Indicator */}
                                     {selectedCategoryId && areDatesValid && (
