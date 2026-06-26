@@ -328,12 +328,15 @@ export default function BookingsConfirm({ category, check_in, check_out, notes, 
 BookingsConfirm.layout = {
     breadcrumbs: [
         {
+            title: 'Dashboard',
+            href: dashboard(),
+        },
+        {
             title: 'Bookings',
             href: bookingsIndex(),
         },
         {
             title: 'Confirm Booking',
-            href: bookingsIndex(),
         },
     ],
 };

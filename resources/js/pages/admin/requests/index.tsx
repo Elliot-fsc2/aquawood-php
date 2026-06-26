@@ -224,7 +224,6 @@ AdminRequestsIndex.layout = {
         },
         {
             title: 'Guest Requests',
-            href: dashboard(),
         },
     ],
 };

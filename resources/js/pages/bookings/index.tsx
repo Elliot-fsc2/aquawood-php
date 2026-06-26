@@ -289,7 +289,7 @@ BookingsIndex.layout = {
         },
         {
             title: 'Bookings',
-            href: dashboard(),
+            href: bookingsIndex(),
         },
     ],
 };

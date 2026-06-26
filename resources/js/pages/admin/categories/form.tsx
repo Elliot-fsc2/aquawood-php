@@ -128,24 +128,26 @@ export default function CategoryForm({ category, floors }: Props) {
         <>
             <Head title={isEditing ? 'Edit Category' : 'Create Category'} />
 
-            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
-                <div className="flex items-center gap-4">
-                    <Link href={adminCategoriesIndex().url}>
-                        <Button variant="ghost" size="icon" className="h-9 w-9">
-                            <ArrowLeft className="h-5 w-5" />
-                        </Button>
-                    </Link>
-                    <div>
-                        <h1 className="text-2xl font-bold tracking-tight">
-                            {isEditing ? 'Edit Category' : 'Create Category'}
-                        </h1>
-                        <p className="text-sm text-muted-foreground">
-                            {isEditing ? 'Update category details' : 'Add a new room category'}
-                        </p>
+            <div className="flex h-full flex-1 flex-col items-center gap-4 overflow-x-auto rounded-xl p-4">
+                <div className="w-full max-w-2xl">
+                    <div className="flex items-center gap-4">
+                        <Link href={adminCategoriesIndex().url}>
+                            <Button variant="ghost" size="icon" className="h-9 w-9">
+                                <ArrowLeft className="h-5 w-5" />
+                            </Button>
+                        </Link>
+                        <div>
+                            <h1 className="text-2xl font-bold tracking-tight">
+                                {isEditing ? 'Edit Category' : 'Create Category'}
+                            </h1>
+                            <p className="text-sm text-muted-foreground">
+                                {isEditing ? 'Update category details' : 'Add a new room category'}
+                            </p>
+                        </div>
                     </div>
                 </div>
 
-                <Card className="max-w-lg">
+                <Card className="w-full max-w-2xl">
                     <CardHeader>
                         <CardTitle>Category Details</CardTitle>
                     </CardHeader>

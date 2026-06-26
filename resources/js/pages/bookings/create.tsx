@@ -449,7 +449,6 @@ BookingsCreate.layout = {
         },
         {
             title: 'New Booking',
-            href: dashboard(),
         },
     ],
 };

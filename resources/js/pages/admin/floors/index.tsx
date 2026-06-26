@@ -51,7 +51,7 @@ export default function FloorsIndex({ floors }: Props) {
         <>
             <Head title="Floors" />
 
-            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
+            <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="text-2xl font-bold tracking-tight">Floors</h1>
@@ -72,7 +72,7 @@ export default function FloorsIndex({ floors }: Props) {
                         <CardTitle>All Floors</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="rounded-md border">
+                        <div className="hidden md:block rounded-md border">
                             <table className="w-full text-sm">
                                 <thead>
                                     <tr className="border-b bg-muted/50">
@@ -139,6 +139,49 @@ export default function FloorsIndex({ floors }: Props) {
                                 </tbody>
                             </table>
                         </div>
+                        {floors.length > 0 && (
+                            <div className="md:hidden space-y-3">
+                                {floors.map((floor) => (
+                                    <div key={floor.id} className="rounded-lg border p-4 space-y-3">
+                                        <div className="flex items-start justify-between">
+                                            <div>
+                                                <div className="font-semibold text-lg">{floor.name}</div>
+                                                <div className="text-sm text-muted-foreground">Level {floor.level}</div>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <Link href={adminCategoriesIndex().url + '?floor_id=' + floor.id}>
+                                                    <Badge variant="secondary" className="cursor-pointer hover:bg-secondary/80">
+                                                        <Tag className="mr-1 h-3 w-3" />
+                                                        {floor.room_categories_count ?? 0}
+                                                    </Badge>
+                                                </Link>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center justify-between text-sm">
+                                            <span className="text-muted-foreground">Description</span>
+                                            <span>{floor.description ?? '—'}</span>
+                                        </div>
+                                        <div className="flex items-center justify-between text-sm">
+                                            <span className="text-muted-foreground">Rooms</span>
+                                            <span className="font-mono">{floor.room_count}</span>
+                                        </div>
+                                        <div className="flex gap-2 pt-1">
+                                            <Button variant="outline" size="sm" className="flex-1" onClick={() => handleEdit(floor)}>
+                                                <Pencil className="mr-1 h-4 w-4" /> Edit
+                                            </Button>
+                                            <Button variant="destructive" size="sm" className="flex-1" onClick={() => handleDelete(floor)}>
+                                                <Trash2 className="mr-1 h-4 w-4" /> Delete
+                                            </Button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                        {floors.length === 0 && (
+                            <div className="md:hidden py-8 text-center text-muted-foreground">
+                                No floors yet. Create your first floor to get started.
+                            </div>
+                        )}
                     </CardContent>
                 </Card>
             </div>

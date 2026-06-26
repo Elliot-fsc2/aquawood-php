@@ -69,7 +69,7 @@ export default function CategoriesIndex({ categories, floors, selectedFloor }: P
         <>
             <Head title="Room Categories" />
 
-            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
+            <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="text-2xl font-bold tracking-tight">Room Categories</h1>
@@ -110,7 +110,7 @@ export default function CategoriesIndex({ categories, floors, selectedFloor }: P
                         </div>
                     </CardHeader>
                     <CardContent>
-                        <div className="rounded-md border">
+                        <div className="hidden md:block rounded-md border">
                             <table className="w-full text-sm">
                                 <thead>
                                     <tr className="border-b bg-muted/50">
@@ -190,6 +190,42 @@ export default function CategoriesIndex({ categories, floors, selectedFloor }: P
                                 </tbody>
                             </table>
                         </div>
+                        {categories.length > 0 && (
+                            <div className="md:hidden space-y-3">
+                                {categories.map((category) => (
+                                    <div key={category.id} className="rounded-lg border p-4 space-y-3">
+                                        <div className="flex items-start justify-between">
+                                            <div className="flex items-center gap-2">
+                                                <Tag className="h-4 w-4 text-muted-foreground" />
+                                                <span className="font-semibold text-lg">{category.name}</span>
+                                            </div>
+                                            <span className="font-mono font-medium">₱{parseFloat(category.base_price).toFixed(2)}</span>
+                                        </div>
+                                        <div className="flex items-center justify-between text-sm">
+                                            <span className="text-muted-foreground">Floor</span>
+                                            <span>{category.floor?.name ?? '—'}</span>
+                                        </div>
+                                        <div className="flex items-center justify-between text-sm">
+                                            <span className="text-muted-foreground">Capacity</span>
+                                            <span>{category.capacity} guest{category.capacity !== 1 ? 's' : ''}</span>
+                                        </div>
+                                        <div className="flex gap-2 pt-1">
+                                            <Button variant="outline" size="sm" className="flex-1" onClick={() => handleEdit(category)}>
+                                                <Pencil className="mr-1 h-4 w-4" /> Edit
+                                            </Button>
+                                            <Button variant="destructive" size="sm" className="flex-1" onClick={() => handleDelete(category)}>
+                                                <Trash2 className="mr-1 h-4 w-4" /> Delete
+                                            </Button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                        {categories.length === 0 && (
+                            <div className="md:hidden py-8 text-center text-muted-foreground">
+                                No categories yet. Create your first category to get started.
+                            </div>
+                        )}
                     </CardContent>
                 </Card>
             </div>

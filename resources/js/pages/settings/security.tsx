@@ -10,6 +10,7 @@ import ManageTwoFactor from '@/components/manage-two-factor';
 import PasswordInput from '@/components/password-input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { dashboard } from '@/routes';
 import { edit } from '@/routes/security';
 
 type Props = {
@@ -140,8 +141,11 @@ export default function Security(props: Props) {
 Security.layout = {
     breadcrumbs: [
         {
+            title: 'Dashboard',
+            href: dashboard(),
+        },
+        {
             title: 'Security settings',
-            href: edit(),
         },
     ],
 };

@@ -69,7 +69,7 @@ export default function RoomsIndex({ rooms }: Props) {
         <>
             <Head title="Rooms" />
 
-            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
+            <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="text-2xl font-bold tracking-tight">Rooms</h1>
@@ -90,7 +90,7 @@ export default function RoomsIndex({ rooms }: Props) {
                         <CardTitle>All Rooms</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="rounded-md border">
+                        <div className="hidden md:block rounded-md border">
                             <table className="w-full text-sm">
                                 <thead>
                                     <tr className="border-b bg-muted/50">
@@ -177,6 +177,44 @@ export default function RoomsIndex({ rooms }: Props) {
                                 </tbody>
                             </table>
                         </div>
+                        {rooms.length > 0 && (
+                            <div className="md:hidden space-y-3">
+                                {rooms.map((room) => (
+                                    <div key={room.id} className="rounded-lg border p-4 space-y-3">
+                                        <div className="flex items-start justify-between">
+                                            <div>
+                                                <div className="font-mono font-semibold text-lg">{room.number}</div>
+                                                <div className="text-sm text-muted-foreground">{room.floor.name}{room.category ? ` · ${room.category.name}` : ''}</div>
+                                            </div>
+                                            <Badge variant={statusVariants[room.status] ?? 'outline'}>
+                                                {room.status.charAt(0).toUpperCase() + room.status.slice(1)}
+                                            </Badge>
+                                        </div>
+                                        <div className="flex items-center justify-between text-sm">
+                                            <span className="text-muted-foreground">Rate</span>
+                                            <span className="font-mono font-medium">₱{parseFloat(room.base_rate).toFixed(2)}</span>
+                                        </div>
+                                        <div className="flex items-center justify-between text-sm">
+                                            <span className="text-muted-foreground">Capacity</span>
+                                            <span>{room.capacity} guest{room.capacity !== 1 ? 's' : ''}</span>
+                                        </div>
+                                        <div className="flex gap-2 pt-1">
+                                            <Button variant="outline" size="sm" className="flex-1" onClick={() => handleEdit(room)}>
+                                                <Pencil className="mr-1 h-4 w-4" /> Edit
+                                            </Button>
+                                            <Button variant="destructive" size="sm" className="flex-1" onClick={() => handleDelete(room)}>
+                                                <Trash2 className="mr-1 h-4 w-4" /> Delete
+                                            </Button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                        {rooms.length === 0 && (
+                            <div className="md:hidden py-8 text-center text-muted-foreground">
+                                No rooms yet. Create your first room to get started.
+                            </div>
+                        )}
                     </CardContent>
                 </Card>
             </div>

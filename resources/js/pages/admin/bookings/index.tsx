@@ -158,7 +158,7 @@ export default function AdminBookingsIndex({ bookings, stats, selectedStatus }: 
         <>
             <Head title="Reservations" />
 
-            <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-4">
+            <div className="flex h-full flex-1 flex-col gap-6 rounded-xl p-4">
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight">Reservations</h1>
                     <p className="text-sm text-muted-foreground">
@@ -212,7 +212,7 @@ export default function AdminBookingsIndex({ bookings, stats, selectedStatus }: 
                         </div>
                     </CardHeader>
                     <CardContent>
-                        <div className="rounded-md border">
+                        <div className="hidden md:block rounded-md border">
                             <table className="w-full text-sm">
                                 <thead>
                                     <tr className="border-b bg-muted/50">
@@ -302,6 +302,49 @@ export default function AdminBookingsIndex({ bookings, stats, selectedStatus }: 
                                 </tbody>
                             </table>
                         </div>
+                        {bookings.length > 0 && (
+                            <div className="md:hidden space-y-3">
+                                {bookings.map((booking) => {
+                                    const config = statusConfig[booking.status] ?? { label: booking.status, variant: 'outline' as const };
+                                    return (
+                                        <div key={booking.id} className="rounded-lg border p-4 space-y-3">
+                                            <div className="flex items-start justify-between">
+                                                <div>
+                                                    <div className="font-semibold">{booking.guest.name}</div>
+                                                    <div className="text-xs text-muted-foreground">{booking.guest.email}</div>
+                                                </div>
+                                                <Badge variant={config.variant} className="text-xs">{config.label}</Badge>
+                                            </div>
+                                            <div className="text-sm">
+                                                <span className="text-muted-foreground">Room {booking.room?.number ?? '—'}</span>
+                                                {booking.room?.category?.name && <span> · {booking.room.category.name}</span>}
+                                            </div>
+                                            <div className="flex items-center justify-between text-sm">
+                                                <span className="text-muted-foreground">Check-in</span>
+                                                <span>{formatDate(booking.check_in_date)}</span>
+                                            </div>
+                                            <div className="flex items-center justify-between text-sm">
+                                                <span className="text-muted-foreground">Check-out</span>
+                                                <span>{formatDate(booking.check_out_date)}</span>
+                                            </div>
+                                            <div className="flex items-center justify-between text-sm">
+                                                <span className="text-muted-foreground">Total</span>
+                                                <span className="font-mono font-semibold">₱{parseFloat(booking.total_price).toFixed(2)}</span>
+                                            </div>
+                                            <Button variant="outline" size="sm" className="w-full" onClick={() => handleViewDetails(booking)}>
+                                                <Eye className="mr-1 h-3.5 w-3.5" /> View Details
+                                            </Button>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+                        {bookings.length === 0 && (
+                            <div className="md:hidden py-8 text-center text-muted-foreground">
+                                No reservations found.
+                                {!selectedStatus && ' Create a booking to get started.'}
+                            </div>
+                        )}
                     </CardContent>
                 </Card>
             </div>

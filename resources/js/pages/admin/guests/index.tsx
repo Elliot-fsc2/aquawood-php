@@ -137,7 +137,7 @@ export default function AdminGuestsIndex({ guests, filters }: Props) {
         <>
             <Head title="Guests" />
 
-            <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-4">
+            <div className="flex h-full flex-1 flex-col gap-6 rounded-xl p-4">
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight">Guests</h1>
                     <p className="text-sm text-muted-foreground">
@@ -225,7 +225,7 @@ export default function AdminGuestsIndex({ guests, filters }: Props) {
                         </div>
                     </CardHeader>
                     <CardContent>
-                        <div className="rounded-md border">
+                        <div className="hidden md:block rounded-md border">
                             <table className="w-full text-sm">
                                 <thead>
                                     <tr className="border-b bg-muted/50">
@@ -317,6 +317,54 @@ export default function AdminGuestsIndex({ guests, filters }: Props) {
                                 </tbody>
                             </table>
                         </div>
+                        {guests.length > 0 && (
+                            <div className="md:hidden space-y-3">
+                                {guests.map((guest) => (
+                                    <div key={guest.id} className="rounded-lg border p-4 space-y-3">
+                                        <div className="flex items-start justify-between">
+                                            <div>
+                                                <div className="font-semibold">{guest.name}</div>
+                                                <div className="text-xs text-muted-foreground">Joined {formatDate(guest.created_at)}</div>
+                                            </div>
+                                            {guest.is_suspended ? (
+                                                <Badge variant="destructive" className="text-xs">Suspended</Badge>
+                                            ) : (
+                                                <Badge variant="default" className="text-xs">Active</Badge>
+                                            )}
+                                        </div>
+                                        <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                                            <Mail className="h-3.5 w-3.5 flex-shrink-0" />
+                                            <span className="truncate">{guest.email}</span>
+                                        </div>
+                                        {guest.guest?.phone && <div className="text-xs text-muted-foreground">{guest.guest.phone}</div>}
+                                        <div className="flex items-center justify-between text-sm">
+                                            <span className="text-muted-foreground">Stays</span>
+                                            <span className="font-medium">{guest.reservations_count}</span>
+                                        </div>
+                                        <div className="flex items-center justify-between text-sm">
+                                            <span className="text-muted-foreground">Total Spent</span>
+                                            <span className="font-mono font-medium">₱{parseFloat(guest.total_spent || '0').toFixed(2)}</span>
+                                        </div>
+                                        <div className="pt-1">
+                                            {guest.is_suspended ? (
+                                                <Button variant="outline" size="sm" className="w-full" onClick={() => promptReinstate(guest)}>
+                                                    <UserRoundCheck className="mr-1 h-3.5 w-3.5" /> Reinstate
+                                                </Button>
+                                            ) : (
+                                                <Button variant="destructive" size="sm" className="w-full" onClick={() => promptSuspend(guest)}>
+                                                    <UserRoundX className="mr-1 h-3.5 w-3.5" /> Suspend
+                                                </Button>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                        {guests.length === 0 && (
+                            <div className="md:hidden py-8 text-center text-muted-foreground">
+                                No guests found.
+                            </div>
+                        )}
                     </CardContent>
                 </Card>
             </div>
