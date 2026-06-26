@@ -91,9 +91,7 @@ class BookingController extends Controller
     {
         $categories = RoomCategory::with('floor')
             ->withCount(['rooms as available_rooms_count' => fn ($q) => $q->where('status', RoomStatusEnum::Available->value)])
-            ->get()
-            ->filter(fn ($category) => $category->available_rooms_count > 0)
-            ->values();
+            ->get();
 
         return Inertia::render('bookings/public-create', [
             'categories' => $categories,
