@@ -4,6 +4,7 @@ use App\Enums\ReservationStatusEnum;
 use App\Enums\RoleEnum;
 use App\Enums\RoomStatusEnum;
 use App\Http\Controllers\BookingController;
+use App\Http\Controllers\GuestRequestController;
 use App\Models\Reservation;
 use App\Models\Room;
 use App\Models\RoomCategory;
@@ -78,6 +79,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('bookings/confirm', [BookingController::class, 'confirm'])->name('bookings.confirm');
     Route::post('bookings', [BookingController::class, 'store'])->name('bookings.store');
     Route::post('bookings/{reservation}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
+
+    // Guest Requests
+    Route::get('requests', [GuestRequestController::class, 'index'])->name('requests.index');
+    Route::post('requests', [GuestRequestController::class, 'store'])->name('requests.store');
 });
 
 require __DIR__.'/settings.php';

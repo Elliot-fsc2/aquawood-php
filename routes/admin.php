@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\FloorController;
 use App\Http\Controllers\Admin\GuestController;
 use App\Http\Controllers\Admin\RoomController;
 use App\Http\Controllers\BookingController;
+use App\Http\Controllers\GuestRequestController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'role:'.RoleEnum::Admin->value])->prefix('admin')->name('admin.')->group(function () {
@@ -41,4 +42,8 @@ Route::middleware(['auth', 'role:'.RoleEnum::Admin->value])->prefix('admin')->na
     // Bookings
     Route::get('bookings', [BookingController::class, 'adminIndex'])->name('bookings.index');
     Route::patch('bookings/{reservation}/status', [BookingController::class, 'adminUpdateStatus'])->name('bookings.update-status');
+
+    // Guest Requests
+    Route::get('requests', [GuestRequestController::class, 'adminIndex'])->name('requests.index');
+    Route::patch('requests/{guest_request}/status', [GuestRequestController::class, 'adminUpdateStatus'])->name('requests.update-status');
 });

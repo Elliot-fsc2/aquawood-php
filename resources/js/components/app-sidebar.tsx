@@ -1,6 +1,6 @@
 import { Link } from '@inertiajs/react';
 import { usePage } from '@inertiajs/react';
-import { BedDouble, BookOpen, Building2, CalendarCheck, LayoutGrid, Leaf, Tag, Users } from 'lucide-react';
+import { BedDouble, BookOpen, Building2, CalendarCheck, LayoutGrid, Leaf, MessageSquare, Tag, Users } from 'lucide-react';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -20,7 +20,9 @@ import { index as adminCategoriesIndex } from '@/routes/admin/categories';
 import { index as adminGuestsIndex } from '@/routes/admin/guests';
 import { index as adminFloorsIndex } from '@/routes/admin/floors';
 import { index as adminRoomsIndex } from '@/routes/admin/rooms';
+import { index as adminRequestsIndex } from '@/routes/admin/requests';
 import { index as bookingsIndex } from '@/routes/bookings';
+import { index as requestsIndex } from '@/routes/requests';
 import { dashboard } from '@/routes';
 import type { NavItem } from '@/types';
 
@@ -47,6 +49,11 @@ export function AppSidebar() {
             title: 'Bookings',
             href: bookingsIndex(),
             icon: BookOpen,
+        },
+        {
+            title: 'Requests',
+            href: requestsIndex(),
+            icon: MessageSquare,
         },
     ];
 
@@ -75,6 +82,11 @@ export function AppSidebar() {
             title: 'Categories',
             href: adminCategoriesIndex(),
             icon: Tag,
+        },
+        {
+            title: 'Requests',
+            href: adminRequestsIndex(),
+            icon: MessageSquare,
         },
     ];
 
