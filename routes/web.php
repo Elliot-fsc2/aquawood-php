@@ -10,6 +10,7 @@ use App\Models\Room;
 use App\Models\RoomCategory;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -38,7 +39,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 ->groupBy('status')
                 ->pluck('count', 'status');
 
-            $rawMonthly = Reservation::selectRaw("strftime('%Y-%m', created_at) as month, count(*) as count")
+            $dateFormat = match (DB::connection()->getDriverName()) {
+                'mysql' => "DATE_FORMAT(created_at, '%Y-%m')",
+                default => "strftime('%Y-%m', created_at)",
+            };
+
+            $rawMonthly = Reservation::selectRaw("{$dateFormat} as month, count(*) as count")
                 ->whereYear('created_at', now()->year)
                 ->groupBy('month')
                 ->orderBy('month')
