@@ -23,6 +23,7 @@ class RoomCategory extends Model
         return [
             'base_price' => 'decimal:2',
             'capacity' => 'integer',
+            'amenities' => 'json',
         ];
     }
 
