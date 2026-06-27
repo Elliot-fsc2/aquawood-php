@@ -57,6 +57,10 @@ export default function RoomsIndex({ rooms }: Props) {
         setDeleteDialog((prev) => ({ ...prev, processing: true }));
 
         router.delete(adminRoomsIndex().url + '/' + deleteDialog.room.id, {
+            preserveScroll: true,
+            optimistic: (props) => ({
+                rooms: props.rooms.filter((r: Room) => r.id !== deleteDialog.room!.id),
+            }),
             onFinish: () => setDeleteDialog({ open: false, room: null, processing: false }),
         });
     };

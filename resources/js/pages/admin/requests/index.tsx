@@ -62,6 +62,14 @@ export default function AdminRequestsIndex({ requests }: Props) {
             updateStatus.url(selectedRequest.id),
             { status },
             {
+                preserveScroll: true,
+                optimistic: (props) => ({
+                    requests: props.requests.map((r: GuestRequest) =>
+                        r.id === selectedRequest!.id
+                            ? { ...r, status, resolved_at: status === 'resolved' ? new Date().toISOString() : null }
+                            : r,
+                    ),
+                }),
                 onSuccess: () => {
                     setSelectedRequest(null);
                     setUpdating(false);

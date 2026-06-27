@@ -39,6 +39,10 @@ export default function FloorsIndex({ floors }: Props) {
         setDeleteDialog((prev) => ({ ...prev, processing: true }));
 
         router.delete(adminFloorsIndex().url + '/' + deleteDialog.floor.id, {
+            preserveScroll: true,
+            optimistic: (props) => ({
+                floors: props.floors.filter((f: Floor) => f.id !== deleteDialog.floor!.id),
+            }),
             onFinish: () => setDeleteDialog({ open: false, floor: null, processing: false }),
         });
     };

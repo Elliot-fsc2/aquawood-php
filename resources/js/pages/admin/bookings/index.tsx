@@ -116,6 +116,8 @@ export default function AdminBookingsIndex({ bookings, stats, selectedStatus }: 
     const handleStatusChange = (newStatus: string) => {
         if (!detailModal.booking) return;
 
+        const oldStatus = detailModal.booking.status;
+
         setUpdatingStatus(true);
 
         router.patch(
@@ -123,6 +125,16 @@ export default function AdminBookingsIndex({ bookings, stats, selectedStatus }: 
             { status: newStatus },
             {
                 preserveScroll: true,
+                optimistic: (props) => ({
+                    bookings: props.bookings.map((b: Booking) =>
+                        b.id === detailModal.booking!.id ? { ...b, status: newStatus } : b,
+                    ),
+                    stats: {
+                        ...props.stats,
+                        [oldStatus]: Math.max(0, (props.stats as Record<string, number>)[oldStatus] - 1),
+                        [newStatus]: ((props.stats as Record<string, number>)[newStatus] ?? 0) + 1,
+                    },
+                }),
                 onFinish: () => {
                     setUpdatingStatus(false);
                     setDetailModal((prev) => ({ ...prev, open: false, booking: null }));

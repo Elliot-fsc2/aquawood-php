@@ -54,6 +54,21 @@ export default function RequestsIndex({ requests, canMakeRequest }: Props) {
             store(),
             form,
             {
+                preserveScroll: true,
+                optimistic: (props) => ({
+                    requests: [
+                        {
+                            id: Date.now(),
+                            title: form.title,
+                            details: form.details,
+                            priority: form.priority,
+                            status: 'pending',
+                            resolved_at: null,
+                            created_at: new Date().toISOString(),
+                        } as GuestRequest,
+                        ...props.requests,
+                    ],
+                }),
                 onSuccess: () => {
                     setShowForm(false);
                     setForm({ title: '', details: '', priority: 'medium' });

@@ -95,29 +95,30 @@ export default function AdminGuestsIndex({ guests, filters }: Props) {
 
     const confirmAction = () => {
         if (!actionDialog.guest) return;
+        const guestId = actionDialog.guest.id;
+        const isSuspend = actionDialog.type === 'suspend';
         setActionDialog((prev) => ({ ...prev, processing: true }));
 
-        if (actionDialog.type === 'suspend') {
-            router.post(
-                adminGuestsSuspend({ user: actionDialog.guest.id }).url,
-                {},
-                {
-                    preserveScroll: true,
-                    onFinish: () =>
-                        setActionDialog({ open: false, type: 'suspend', guest: null, processing: false }),
-                },
-            );
-        } else {
-            router.post(
-                adminGuestsReinstate({ user: actionDialog.guest.id }).url,
-                {},
-                {
-                    preserveScroll: true,
-                    onFinish: () =>
-                        setActionDialog({ open: false, type: 'reinstate', guest: null, processing: false }),
-                },
-            );
-        }
+        const url = isSuspend
+            ? adminGuestsSuspend({ user: guestId }).url
+            : adminGuestsReinstate({ user: guestId }).url;
+
+        router.post(
+            url,
+            {},
+            {
+                preserveScroll: true,
+                optimistic: (props) => ({
+                    guests: props.guests.map((g: GuestUser) =>
+                        g.id === guestId
+                            ? { ...g, is_suspended: isSuspend, suspended_at: isSuspend ? new Date().toISOString() : null }
+                            : g,
+                    ),
+                }),
+                onFinish: () =>
+                    setActionDialog({ open: false, type: 'suspend', guest: null, processing: false }),
+            },
+        );
     };
 
     const formatDate = (dateStr: string | null) => {

@@ -49,6 +49,10 @@ export default function CategoriesIndex({ categories, floors, selectedFloor }: P
         setDeleteDialog((prev) => ({ ...prev, processing: true }));
 
         router.delete(adminCategoriesIndex().url + '/' + deleteDialog.category.id, {
+            preserveScroll: true,
+            optimistic: (props) => ({
+                categories: props.categories.filter((c: Category) => c.id !== deleteDialog.category!.id),
+            }),
             onFinish: () => setDeleteDialog({ open: false, category: null, processing: false }),
         });
     };

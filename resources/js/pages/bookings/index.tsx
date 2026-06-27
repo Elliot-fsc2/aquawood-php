@@ -61,6 +61,12 @@ export default function BookingsIndex({ bookings }: Props) {
             bookingsCancel({ reservation: selectedBooking.id }).url,
             {},
             {
+                preserveScroll: true,
+                optimistic: (props) => ({
+                    bookings: props.bookings.map((b: Booking) =>
+                        b.id === selectedBooking!.id ? { ...b, status: 'cancelled' } : b,
+                    ),
+                }),
                 onFinish: () => {
                     setCancelling(false);
                     setSelectedBooking(null);
