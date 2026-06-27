@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('number');
             $table->foreignId('floor_id')->constrained('floors')->onDelete('cascade');
-            $table->foreignId('room_category_id')->constrained('room_categories')->onDelete('set null');
+            $table->foreignId('room_category_id')->nullable()->constrained('room_categories')->onDelete('set null');
             $table->string('type');
             $table->decimal('base_rate', 12, 2)->default(0);
             $table->string('status')->default('available');
