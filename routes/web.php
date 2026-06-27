@@ -64,7 +64,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
                     'checked_out' => $bookingsByStatus[ReservationStatusEnum::CheckedOut->value] ?? 0,
                     'cancelled' => $bookingsByStatus[ReservationStatusEnum::Cancelled->value] ?? 0,
                     'total_guests' => User::role(RoleEnum::Guest->value)->count(),
-                    'active_guests' => User::role(RoleEnum::Guest->value)->whereDoesntHave('guest', fn ($q) => $q->where('is_suspended', true))->count(),
+                    'active_guests' => User::role(RoleEnum::Guest->value)->whereNull('suspended_at')->count(),
                     'available_rooms' => Room::where('status', RoomStatusEnum::Available->value)->count(),
                     'occupied_rooms' => Room::where('status', RoomStatusEnum::Occupied->value)->count(),
                     'maintenance_rooms' => Room::where('status', RoomStatusEnum::Maintenance->value)->count(),
