@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Head, Link, usePage, router } from '@inertiajs/react';
 import { dashboard, login, register, home } from '@/routes';
 import { publicCreate as bookingsPublicCreate } from '@/routes/bookings';
@@ -15,6 +16,8 @@ import {
     Sparkles,
     ChevronDown,
     Navigation,
+    Menu,
+    X,
     Wifi,
     Wind,
     Tv,
@@ -76,6 +79,7 @@ const amenityIcons: Record<string, React.ReactNode> = {
 };
 
 export default function Welcome() {
+    const [mobileNavOpen, setMobileNavOpen] = useState(false);
     const { auth, property: prop, roomCategories } = usePage().props;
 
     const p = prop || {};
@@ -114,6 +118,17 @@ export default function Welcome() {
                                 </div>
                             </div>
                         </Link>
+                        <button
+                            className="flex p-1 text-brand-800 md:hidden"
+                            onClick={() => setMobileNavOpen(!mobileNavOpen)}
+                            aria-label="Toggle navigation"
+                        >
+                            {mobileNavOpen ? (
+                                <X className="h-6 w-6" />
+                            ) : (
+                                <Menu className="h-6 w-6" />
+                            )}
+                        </button>
                         <nav className="hidden items-center gap-6 text-sm text-brand-800 md:flex">
                             <a
                                 href="#rooms"
@@ -171,6 +186,75 @@ export default function Welcome() {
                             )}
                         </nav>
                     </div>
+                    {mobileNavOpen && (
+                        <div className="border-t border-brand-100 bg-cream-50 px-6 py-4 md:hidden">
+                            <nav className="flex flex-col gap-4 text-sm text-brand-800">
+                                <a
+                                    href="#rooms"
+                                    onClick={() => setMobileNavOpen(false)}
+                                    className="transition hover:text-brand-500"
+                                >
+                                    Rooms
+                                </a>
+                                <a
+                                    href="#dining"
+                                    onClick={() => setMobileNavOpen(false)}
+                                    className="transition hover:text-brand-500"
+                                >
+                                    Restaurant
+                                </a>
+                                <a
+                                    href="#events"
+                                    onClick={() => setMobileNavOpen(false)}
+                                    className="transition hover:text-brand-500"
+                                >
+                                    Events
+                                </a>
+                                <a
+                                    href="#pool"
+                                    onClick={() => setMobileNavOpen(false)}
+                                    className="transition hover:text-brand-500"
+                                >
+                                    Pool & Garden
+                                </a>
+                                <a
+                                    href="#contact"
+                                    onClick={() => setMobileNavOpen(false)}
+                                    className="transition hover:text-brand-500"
+                                >
+                                    Contact
+                                </a>
+                                <div className="mt-2 flex flex-col gap-3 pt-2 border-t border-brand-100">
+                                    {auth?.user ? (
+                                        <Link
+                                            href={dashboard()}
+                                            onClick={() => setMobileNavOpen(false)}
+                                            className="rounded-full border border-brand-300 px-4 py-2 text-center text-xs text-brand-700 transition hover:bg-brand-50"
+                                        >
+                                            Dashboard
+                                        </Link>
+                                    ) : (
+                                        <>
+                                            <Link
+                                                href={login()}
+                                                onClick={() => setMobileNavOpen(false)}
+                                                className="rounded-full border border-brand-300 px-4 py-2 text-center text-xs text-brand-700 transition hover:bg-brand-50"
+                                            >
+                                                Login
+                                            </Link>
+                                            <Link
+                                                href={bookingsPublicCreate()}
+                                                onClick={() => setMobileNavOpen(false)}
+                                                className="rounded-full bg-brand-800 px-5 py-2.5 text-center text-cream-50 transition hover:bg-brand-900"
+                                            >
+                                                Book Now
+                                            </Link>
+                                        </>
+                                    )}
+                                </div>
+                            </nav>
+                        </div>
+                    )}
                 </header>
 
                 <section className="relative h-screen min-h-[700px]">
@@ -186,7 +270,7 @@ export default function Welcome() {
                             <Sparkles className="h-4 w-4" />
                         </div>
                         <h1
-                            className="mb-6 animate-fade-up font-serif text-5xl leading-tight font-light md:text-7xl"
+                            className="mb-6 animate-fade-up font-serif text-4xl leading-tight font-light md:text-7xl"
                             style={{ animationDelay: '0.1s' }}
                         >
                             {p.tagline ||
@@ -284,7 +368,7 @@ export default function Welcome() {
                             <img
                                 src={aq.garden}
                                 alt="Garden pathway"
-                                className="absolute -bottom-8 -left-8 h-48 w-48 rounded-lg border-4 border-cream-50 object-cover shadow-xl"
+                                className="absolute -bottom-8 -left-8 hidden h-48 w-48 rounded-lg border-4 border-cream-50 object-cover shadow-xl md:block"
                             />
                         </div>
                     </div>
@@ -521,7 +605,7 @@ export default function Welcome() {
                             <img
                                 src={aq.restaurant}
                                 alt="Function hall"
-                                className="mt-12 aspect-[3/4] w-full rounded-lg object-cover"
+                                className="mt-6 aspect-[3/4] w-full rounded-lg object-cover md:mt-12"
                             />
                         </div>
                     </div>
@@ -732,24 +816,24 @@ export default function Welcome() {
                                     );
                                 }}
                             >
-                                <div className="grid grid-cols-2 gap-4">
-                                    <label className="space-y-1">
-                                        <span className="text-sm text-brand-700">First name</span>
-                                        <input
-                                            required
-                                            placeholder="Juan"
-                                            className="w-full rounded-md border border-brand-100 px-4 py-3 focus:border-brand-500 focus:outline-none"
-                                        />
-                                    </label>
-                                    <label className="space-y-1">
-                                        <span className="text-sm text-brand-700">Last name</span>
-                                        <input
-                                            required
-                                            placeholder="Dela Cruz"
-                                            className="w-full rounded-md border border-brand-100 px-4 py-3 focus:border-brand-500 focus:outline-none"
-                                        />
-                                    </label>
-                                </div>
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                <label className="space-y-1">
+                                    <span className="text-sm text-brand-700">First name</span>
+                                    <input
+                                        required
+                                        placeholder="Juan"
+                                        className="w-full rounded-md border border-brand-100 px-4 py-3 focus:border-brand-500 focus:outline-none"
+                                    />
+                                </label>
+                                <label className="space-y-1">
+                                    <span className="text-sm text-brand-700">Last name</span>
+                                    <input
+                                        required
+                                        placeholder="Dela Cruz"
+                                        className="w-full rounded-md border border-brand-100 px-4 py-3 focus:border-brand-500 focus:outline-none"
+                                    />
+                                </label>
+                            </div>
                                 <label className="block space-y-1">
                                     <span className="text-sm text-brand-700">Email address</span>
                                     <input
