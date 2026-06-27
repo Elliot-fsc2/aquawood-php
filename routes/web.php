@@ -38,6 +38,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 ->groupBy('status')
                 ->pluck('count', 'status');
 
+            $rawMonthly = Reservation::selectRaw("strftime('%Y-%m', created_at) as month, count(*) as count")
+                ->whereYear('created_at', now()->year)
+                ->groupBy('month')
+                ->orderBy('month')
+                ->pluck('count', 'month');
+
+            $monthlyReservations = collect(range(1, 12))->map(fn ($m) => [
+                'month' => now()->month($m)->format('M'),
+                'reservations' => (int) ($rawMonthly[now()->month($m)->format('Y-m')] ?? 0),
+            ]);
+
             return Inertia::render('admin/dashboard', [
                 'stats' => [
                     'total_bookings' => array_sum($bookingsByStatus->toArray()),
@@ -53,6 +64,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
                     'maintenance_rooms' => Room::where('status', RoomStatusEnum::Maintenance->value)->count(),
                     'booked_rooms' => Room::where('status', RoomStatusEnum::Booked->value)->count(),
                     'total_categories' => RoomCategory::count(),
+                    'monthly_reservations' => $monthlyReservations,
                 ],
             ]);
         }

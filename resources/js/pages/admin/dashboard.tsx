@@ -6,12 +6,24 @@ import {
     CalendarCheck,
     Users,
 } from 'lucide-react';
+import { Bar, BarChart, CartesianGrid, XAxis } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+    ChartContainer,
+    ChartTooltip,
+    ChartTooltipContent,
+    type ChartConfig,
+} from '@/components/ui/chart';
 import { index as adminBookingsIndex } from '@/routes/admin/bookings';
 import { index as adminGuestsIndex } from '@/routes/admin/guests';
 import { index as adminRoomsIndex } from '@/routes/admin/rooms';
 import { index as adminCategoriesIndex } from '@/routes/admin/categories';
 import { dashboard } from '@/routes';
+
+interface MonthlyReservation {
+    month: string;
+    reservations: number;
+}
 
 interface DashboardProps {
     stats: {
@@ -28,8 +40,16 @@ interface DashboardProps {
         maintenance_rooms: number;
         booked_rooms: number;
         total_categories: number;
+        monthly_reservations: MonthlyReservation[];
     };
 }
+
+const chartConfig = {
+    reservations: {
+        label: 'Reservations',
+        color: 'var(--color-chart-1)',
+    },
+} satisfies ChartConfig;
 
 export default function AdminDashboard({ stats }: DashboardProps) {
     const statCards = [
@@ -188,6 +208,29 @@ export default function AdminDashboard({ stats }: DashboardProps) {
                             </Card>
                         </Link>
                     ))}
+                </div>
+
+                <div className="rounded-xl border bg-card p-6">
+                    <h2 className="mb-4 text-lg font-semibold">
+                        Reservations Per Month
+                    </h2>
+                    <ChartContainer config={chartConfig} className="mx-auto h-[200px] w-full max-w-xl">
+                        <BarChart accessibilityLayer data={stats.monthly_reservations}>
+                            <CartesianGrid vertical={false} />
+                            <XAxis
+                                dataKey="month"
+                                tickLine={false}
+                                tickMargin={10}
+                                axisLine={false}
+                            />
+                            <ChartTooltip content={<ChartTooltipContent />} />
+                            <Bar
+                                dataKey="reservations"
+                                fill="var(--color-reservations)"
+                                radius={4}
+                            />
+                        </BarChart>
+                    </ChartContainer>
                 </div>
 
                 <div className="rounded-xl border bg-card p-6">
