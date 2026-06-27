@@ -94,4 +94,4 @@ routes/
 
 Deploy with [Laravel Cloud](https://cloud.laravel.com/).
 
-   
+       
