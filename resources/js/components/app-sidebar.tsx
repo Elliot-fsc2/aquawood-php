@@ -1,6 +1,6 @@
 import { Link } from '@inertiajs/react';
 import { usePage } from '@inertiajs/react';
-import { BedDouble, BookOpen, Building2, CalendarCheck, LayoutGrid, Leaf, MessageSquare, Tag, Users } from 'lucide-react';
+import { BedDouble, BookOpen, Building2, CalendarCheck, LayoutGrid, Leaf, MessageSquare, Monitor, Tag, Users } from 'lucide-react';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -23,6 +23,7 @@ import { index as adminRoomsIndex } from '@/routes/admin/rooms';
 import { index as adminRequestsIndex } from '@/routes/admin/requests';
 import { index as bookingsIndex } from '@/routes/bookings';
 import { index as requestsIndex } from '@/routes/requests';
+import { index as frontdeskIndex } from '@/routes/frontdesk';
 import { dashboard } from '@/routes';
 import type { NavItem } from '@/types';
 
@@ -43,6 +44,16 @@ export function AppSidebar() {
     const isMobile = useIsMobile();
     const { auth } = usePage().props;
     const isAdmin = auth.roles?.includes('Admin') ?? false;
+    const isReceptionist = auth.roles?.includes('Receptionist') ?? false;
+    const canAccessFrontdesk = isAdmin || isReceptionist;
+
+    const frontdeskNavItems: NavItem[] = [
+        {
+            title: 'Front Desk',
+            href: frontdeskIndex(),
+            icon: Monitor,
+        },
+    ];
 
     const guestNavItems: NavItem[] = [
         {
@@ -122,7 +133,8 @@ export function AppSidebar() {
 
             <SidebarContent>
                 <NavMain items={mainNavItems} label="Main" />
-                {!isAdmin && <NavMain items={guestNavItems} label="Bookings" />}
+                {canAccessFrontdesk && <NavMain items={frontdeskNavItems} label="Operations" />}
+                {!isAdmin && !isReceptionist && <NavMain items={guestNavItems} label="Bookings" />}
                 {isAdmin && <NavMain items={adminNavItems} label="Management" />}
             </SidebarContent>
 

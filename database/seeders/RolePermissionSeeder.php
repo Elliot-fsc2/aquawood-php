@@ -39,5 +39,17 @@ class RolePermissionSeeder extends Seeder
             PermissionEnum::ViewFloors->value,
             PermissionEnum::ViewRoomCategories->value,
         ]);
+
+        // Create Receptionist role with frontdesk permissions
+        $receptionist = Role::firstOrCreate(['name' => RoleEnum::Receptionist->value]);
+        $receptionist->syncPermissions([
+            PermissionEnum::ViewRooms->value,
+            PermissionEnum::ViewFloors->value,
+            PermissionEnum::ViewRoomCategories->value,
+            PermissionEnum::ManageReservations->value,
+            PermissionEnum::ManageCheckIn->value,
+            PermissionEnum::ManageCheckOut->value,
+            PermissionEnum::ManageRoomStatus->value,
+        ]);
     }
 }

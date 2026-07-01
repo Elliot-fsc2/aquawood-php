@@ -16,6 +16,7 @@ class Reservation extends Model
         'total_price',
         'status',
         'notes',
+        'details',
     ];
 
     /**
@@ -28,6 +29,7 @@ class Reservation extends Model
             'check_out_date' => 'date',
             'total_price' => 'decimal:2',
             'status' => ReservationStatusEnum::class,
+            'details' => 'array',
         ];
     }
 

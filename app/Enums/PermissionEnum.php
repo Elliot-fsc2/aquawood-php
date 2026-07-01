@@ -16,10 +16,11 @@ enum PermissionEnum: string
     case CreateRoomCategories = 'create-room-categories';
     case EditRoomCategories = 'edit-room-categories';
     case DeleteRoomCategories = 'delete-room-categories';
+    case ManageReservations = 'manage-reservations';
+    case ManageCheckIn = 'manage-checkin';
+    case ManageCheckOut = 'manage-checkout';
+    case ManageRoomStatus = 'manage-room-status';
 
-    /**
-     * Get all permission values as an array of strings.
-     */
     public static function values(): array
     {
         return array_column(self::cases(), 'value');
