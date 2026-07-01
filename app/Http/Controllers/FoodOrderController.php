@@ -8,6 +8,7 @@ use App\Actions\Food\UpdateFoodOrderStatusAction;
 use App\Models\FoodOrder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class FoodOrderController extends Controller
 {
@@ -28,6 +29,11 @@ class FoodOrderController extends Controller
 
         $createFoodOrder->handle($validated, $request->user()->id);
 
+        Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => 'Order placed successfully.',
+        ]);
+
         return back();
     }
 
@@ -41,6 +47,11 @@ class FoodOrderController extends Controller
 
         $updateStatus->handle($foodOrder, $validated['status']);
 
+        Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => 'Order status updated.',
+        ]);
+
         return back();
     }
 
@@ -49,6 +60,11 @@ class FoodOrderController extends Controller
         $this->authorize('delete', $foodOrder);
 
         $deleteFoodOrder->handle($foodOrder);
+
+        Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => 'Order deleted.',
+        ]);
 
         return back();
     }

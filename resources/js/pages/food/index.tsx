@@ -705,8 +705,8 @@ function MenuManagement({ foodItems }: { foodItems: FoodItem[] }) {
                             <th className="text-left pb-2 font-medium">Item</th>
                             <th className="text-left pb-2 font-medium">Category</th>
                             <th className="text-left pb-2 font-medium">Description</th>
-                            <th className="text-right pb-2 font-medium">Price</th>
-                            <th className="text-left pb-2 font-medium">Prep</th>
+                            <th className="text-right pb-2 font-medium whitespace-nowrap pr-4">Price</th>
+                            <th className="text-left pb-2 font-medium whitespace-nowrap">Prep</th>
                             <th className="text-left pb-2 font-medium">Status</th>
                             <th className="text-right pb-2 font-medium">Actions</th>
                         </tr>
@@ -731,8 +731,8 @@ function MenuManagement({ foodItems }: { foodItems: FoodItem[] }) {
                                     </span>
                                 </td>
                                 <td className="py-3 text-brand-700 text-xs max-w-xs truncate">{item.description}</td>
-                                <td className="py-3 text-right font-medium">₱{item.price}</td>
-                                <td className="py-3 text-brand-700 text-xs">{item.prepTime ?? '-'}</td>
+                                <td className="py-3 text-right font-medium whitespace-nowrap pr-4">₱{item.price}</td>
+                                <td className="py-3 text-brand-700 text-xs whitespace-nowrap">{item.prepTime ?? '-'}</td>
                                 <td className="py-3">
                                     <button
                                         onClick={() => exec(foodToggleAvailability({ foodItem: Number(item.id) }).url, 'patch')}

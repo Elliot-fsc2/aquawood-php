@@ -107,6 +107,11 @@ class FrontdeskController extends Controller
             return back()->withErrors(['checkin' => $e->getMessage()]);
         }
 
+        Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => 'Guest checked in successfully.',
+        ]);
+
         return back();
     }
 
@@ -141,6 +146,11 @@ class FrontdeskController extends Controller
                 'total' => number_format((float) $receipt->total, 2),
                 'status' => $receipt->status,
             ]);
+
+            Inertia::flash('toast', [
+                'type' => 'success',
+                'message' => 'Check-out processed successfully.',
+            ]);
         } catch (\RuntimeException $e) {
             return back()->withErrors(['checkout' => $e->getMessage()]);
         }
@@ -158,6 +168,11 @@ class FrontdeskController extends Controller
             return back()->withErrors(['confirm' => $e->getMessage()]);
         }
 
+        Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => 'Booking confirmed.',
+        ]);
+
         return back();
     }
 
@@ -170,6 +185,11 @@ class FrontdeskController extends Controller
         ]);
 
         $reservation->update(['status' => $validated['status']]);
+
+        Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => 'Reservation status updated.',
+        ]);
 
         return back();
     }
@@ -187,6 +207,11 @@ class FrontdeskController extends Controller
         } catch (\RuntimeException $e) {
             return back()->withErrors(['room_status' => $e->getMessage()]);
         }
+
+        Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => 'Room status updated.',
+        ]);
 
         return back();
     }
@@ -215,6 +240,11 @@ class FrontdeskController extends Controller
             return back()->withErrors(['reservation' => $e->getMessage()]);
         }
 
+        Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => 'Walk-in booked and checked in successfully.',
+        ]);
+
         return back();
     }
 
@@ -232,6 +262,11 @@ class FrontdeskController extends Controller
 
         $reservation->update(['status' => 'cancelled']);
         $reservation->room->update(['status' => 'available']);
+
+        Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => 'Reservation cancelled.',
+        ]);
 
         return back();
     }

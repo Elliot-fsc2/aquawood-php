@@ -98,6 +98,11 @@ class FoodController extends Controller
 
         $createFoodItem->handle($validated);
 
+        Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => 'Menu item added successfully.',
+        ]);
+
         return back();
     }
 
@@ -131,6 +136,11 @@ class FoodController extends Controller
 
         $updateFoodItem->handle($foodItem, $validated);
 
+        Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => 'Menu item updated successfully.',
+        ]);
+
         return back();
     }
 
@@ -144,6 +154,11 @@ class FoodController extends Controller
 
         $deleteFoodItem->handle($foodItem);
 
+        Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => 'Menu item deleted.',
+        ]);
+
         return back();
     }
 
@@ -152,6 +167,11 @@ class FoodController extends Controller
         $this->authorize('update', $foodItem);
 
         $toggleAvailability->handle($foodItem);
+
+        Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => 'Menu item availability toggled.',
+        ]);
 
         return back();
     }
