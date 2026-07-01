@@ -1,18 +1,16 @@
 import { useMemo, useRef, useState, useEffect, useCallback } from 'react';
 import { Head, Link, useForm, usePage, router } from '@inertiajs/react';
 import { confirm as bookingsConfirm, checkAvailability } from '@/routes/bookings';
-import { login, register } from '@/routes';
+import { login } from '@/routes';
 import { ArrowLeft, BedDouble, CheckCircle2, LoaderCircle, TriangleAlert, Users, XCircle, Minus, Plus } from 'lucide-react';
 import type { DateRange } from 'react-day-picker';
 import { DateRangePicker } from '@/components/date-range-picker';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import InputError from '@/components/input-error';
 import BookingSteps from '@/components/booking-steps';
 import { home } from '@/routes';
 
@@ -62,10 +60,6 @@ export default function BookingsPublicCreate({ categories }: Props) {
 
     const toDateString = (date: Date) => date.toISOString().split('T')[0];
 
-    useEffect(() => {
-        setAvailabilityResult(null);
-    }, [selectedCategoryId]);
-
     const checkDateAvailability = useCallback(
         async (categoryId: number, checkIn: string, checkOut: string) => {
             if (!checkIn || !checkOut) return;
@@ -80,6 +74,12 @@ export default function BookingsPublicCreate({ categories }: Props) {
                         'X-Requested-With': 'XMLHttpRequest',
                     },
                 });
+
+                if (!response.ok) {
+                    setAvailabilityResult({ available: false, available_rooms: 0 });
+                    return;
+                }
+
                 const result = await response.json();
                 setAvailabilityResult(result);
             } catch {
@@ -184,9 +184,10 @@ export default function BookingsPublicCreate({ categories }: Props) {
 
     const handleCategoryClick = (categoryId: number) => {
         setSelectedCategoryId(categoryId);
+        setAvailabilityResult(null);
+        setIsCheckingAvailability(false);
 
         if (data.check_in_date && data.check_out_date && new Date(data.check_in_date) < new Date(data.check_out_date)) {
-            setAvailabilityResult(null);
             setIsCheckingAvailability(true);
             checkDateAvailability(categoryId, data.check_in_date, data.check_out_date);
         }

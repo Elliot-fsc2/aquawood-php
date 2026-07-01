@@ -38,6 +38,8 @@ class RolePermissionSeeder extends Seeder
             PermissionEnum::ViewRooms->value,
             PermissionEnum::ViewFloors->value,
             PermissionEnum::ViewRoomCategories->value,
+            PermissionEnum::ViewFoodItems->value,
+            PermissionEnum::CreateFoodOrders->value,
         ]);
 
         // Create Receptionist role with frontdesk permissions
@@ -50,6 +52,17 @@ class RolePermissionSeeder extends Seeder
             PermissionEnum::ManageCheckIn->value,
             PermissionEnum::ManageCheckOut->value,
             PermissionEnum::ManageRoomStatus->value,
+            PermissionEnum::ViewFoodItems->value,
+            PermissionEnum::CreateFoodOrders->value,
+        ]);
+
+        // Create Staff role with food & kitchen permissions
+        $staff = Role::firstOrCreate(['name' => RoleEnum::Staff->value]);
+        $staff->syncPermissions([
+            PermissionEnum::ViewFoodItems->value,
+            PermissionEnum::EditFoodItems->value,
+            PermissionEnum::ViewFoodOrders->value,
+            PermissionEnum::EditFoodOrders->value,
         ]);
     }
 }

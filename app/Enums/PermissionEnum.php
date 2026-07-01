@@ -20,6 +20,14 @@ enum PermissionEnum: string
     case ManageCheckIn = 'manage-checkin';
     case ManageCheckOut = 'manage-checkout';
     case ManageRoomStatus = 'manage-room-status';
+    case ViewFoodItems = 'view-food-items';
+    case CreateFoodItems = 'create-food-items';
+    case EditFoodItems = 'edit-food-items';
+    case DeleteFoodItems = 'delete-food-items';
+    case ViewFoodOrders = 'view-food-orders';
+    case CreateFoodOrders = 'create-food-orders';
+    case EditFoodOrders = 'edit-food-orders';
+    case CancelFoodOrders = 'cancel-food-orders';
 
     public static function values(): array
     {

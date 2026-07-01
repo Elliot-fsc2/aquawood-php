@@ -1,6 +1,6 @@
 import { Link } from '@inertiajs/react';
 import { usePage } from '@inertiajs/react';
-import { BedDouble, BookOpen, Building2, CalendarCheck, LayoutGrid, Leaf, MessageSquare, Monitor, Tag, Users } from 'lucide-react';
+import { BedDouble, BookOpen, Building2, CalendarCheck, LayoutGrid, Leaf, MessageSquare, Monitor, Tag, Users, Utensils } from 'lucide-react';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -24,6 +24,7 @@ import { index as adminRequestsIndex } from '@/routes/admin/requests';
 import { index as bookingsIndex } from '@/routes/bookings';
 import { index as requestsIndex } from '@/routes/requests';
 import { index as frontdeskIndex } from '@/routes/frontdesk';
+import { index as foodIndex } from '@/routes/food/index';
 import { dashboard } from '@/routes';
 import type { NavItem } from '@/types';
 
@@ -45,13 +46,24 @@ export function AppSidebar() {
     const { auth } = usePage().props;
     const isAdmin = auth.roles?.includes('Admin') ?? false;
     const isReceptionist = auth.roles?.includes('Receptionist') ?? false;
+    const isStaff = auth.roles?.includes('Staff') ?? false;
+    const isGuest = auth.roles?.includes('Guest') ?? false;
     const canAccessFrontdesk = isAdmin || isReceptionist;
+    const canAccessFood = isAdmin || isStaff || isReceptionist || isGuest;
 
     const frontdeskNavItems: NavItem[] = [
         {
             title: 'Front Desk',
             href: frontdeskIndex(),
             icon: Monitor,
+        },
+    ];
+
+    const foodNavItems: NavItem[] = [
+        {
+            title: 'Food & Beverage',
+            href: foodIndex(),
+            icon: Utensils,
         },
     ];
 
@@ -134,7 +146,8 @@ export function AppSidebar() {
             <SidebarContent>
                 <NavMain items={mainNavItems} label="Main" />
                 {canAccessFrontdesk && <NavMain items={frontdeskNavItems} label="Operations" />}
-                {!isAdmin && !isReceptionist && <NavMain items={guestNavItems} label="Bookings" />}
+                {canAccessFood && <NavMain items={foodNavItems} label="Food & Beverage" />}
+                {isGuest && <NavMain items={guestNavItems} label="Bookings" />}
                 {isAdmin && <NavMain items={adminNavItems} label="Management" />}
             </SidebarContent>
 

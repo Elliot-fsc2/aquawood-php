@@ -2,8 +2,12 @@
 
 namespace App\Providers;
 
+use App\Models\FoodItem;
+use App\Models\FoodOrder;
 use App\Models\Reservation;
 use App\Models\Room;
+use App\Policies\FoodItemPolicy;
+use App\Policies\FoodOrderPolicy;
 use App\Policies\ReservationPolicy;
 use App\Policies\RoomPolicy;
 use Carbon\CarbonImmutable;
@@ -36,6 +40,8 @@ class AppServiceProvider extends ServiceProvider
     {
         Gate::policy(Reservation::class, ReservationPolicy::class);
         Gate::policy(Room::class, RoomPolicy::class);
+        Gate::policy(FoodItem::class, FoodItemPolicy::class);
+        Gate::policy(FoodOrder::class, FoodOrderPolicy::class);
     }
 
     /**
