@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\EmergencyTypeEnum;
+use App\Enums\ReservationStatusEnum;
 use App\Models\EmergencyAlert;
 use App\Models\Reservation;
 use Illuminate\Http\JsonResponse;
@@ -39,6 +40,11 @@ class EmergencyController extends Controller
             'type' => $validated['type'],
             'details' => $validated['details'] ?? null,
             'status' => 'active',
+        ]);
+
+        Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => 'Emergency alert sent. Front desk has been notified.',
         ]);
 
         return back();
@@ -82,6 +88,11 @@ class EmergencyController extends Controller
             'acknowledged_at' => now(),
         ]);
 
+        Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => 'Emergency alert acknowledged.',
+        ]);
+
         return back();
     }
 
@@ -98,6 +109,11 @@ class EmergencyController extends Controller
             'status' => 'resolved',
             'acknowledged_by' => $emergencyAlert->acknowledged_by ?? $request->user()->id,
             'acknowledged_at' => $emergencyAlert->acknowledged_at ?? now(),
+        ]);
+
+        Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => 'Emergency alert resolved.',
         ]);
 
         return back();
