@@ -169,6 +169,97 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 
 - If you receive an "Illuminate\Foundation\ViteException: Unable to locate file in Vite manifest" error, you can run `npm run build` or ask the user to run `npm run dev` or `composer run dev`.
 
+=== best-practices ===
+
+# Action Classes for Business Logic
+
+## Overview
+
+Action classes are used in this application to separate business logic from controllers. Each action class encapsulates a specific use case or business operation.
+
+## Naming Conventions
+
+Action classes follow the pattern `App\Actions\[Domain]\{ActionName}Action.php`:
+- **Domain**: Logical grouping (Booking, Frontdesk, Food, Guest, GuestRequest, Guest\Guest, etc.)
+- **Action Name**: Past participle verb (Create, Update, Delete, CheckIn, CheckOut, Suspend, etc.)
+
+## Method Patterns
+
+### Create Actions
+
+Actions that create new resources use the `create($data): Model` pattern:
+- Takes only the data needed for creation as a parameter
+- Returns the newly created model instance
+- Example: `CreateFoodItemAction`, `CreateBookingAction`
+
+### State Change Actions
+
+Actions that modify existing models use the `handle($model, $data): Model` pattern:
+- Takes the existing model instance as first parameter
+- Takes optional data for the modification as second parameter
+- Returns the updated model instance
+- Example: `UpdateFoodItemAction`, `CheckInAction`
+
+## Controller Usage
+
+In controllers, action classes are injected as dependencies and used as follows:
+
+### For Create Actions
+```php
+public function store(Request $request, CreateFoodItemAction $createFoodItem): RedirectResponse
+{
+    $validated = $request->validate([...]);
+    
+    if ($request->hasFile('image')) {
+        $validated['image'] = $request->file('image')->store('images/food', 'public');
+    }
+    
+    $createFoodItem->handle($validated);
+    
+    return redirect()->route('food.index');
+}
+```
+
+### For State Change Actions
+```php
+public function checkIn(Request $request, Reservation $reservation, CheckInAction $checkIn): RedirectResponse
+{
+    $this->authorize('checkIn', $reservation);
+    
+    try {
+        $checkIn->handle($reservation);
+    } catch (\RuntimeException $e) {
+        return back()->withErrors(['checkin' => $e->getMessage()]);
+    }
+    
+    Inertia::flash('toast', [
+        'type' => 'success',
+        'message' => 'Guest checked in successfully.',
+    ]);
+    
+    return back();
+}
+```
+
+## Error Handling
+
+Action classes throw `\RuntimeException` for business logic errors:
+- Controllers catch these exceptions and convert them to user-friendly messages
+- Validation errors are handled using form request validation
+- Success messages are displayed using Inertia's flash method
+
+## Service Location
+
+Action classes are placed in `app/Actions\{Feature}\` directories to organize business logic by feature domain.
+
+## Benefits
+
+- **Separation of Concerns**: Business logic is separated from HTTP request handling
+- **Testability**: Action classes can be tested independently without middleware or authentication
+- **Reusability**: Action classes can be used by both web controllers and API endpoints
+- **Maintainability**: Clear organization of business logic by domain
+- **Consistency**: Standardized patterns for creating and modifying resources
+
 === wayfinder/core rules ===
 
 # Laravel Wayfinder

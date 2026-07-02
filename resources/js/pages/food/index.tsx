@@ -5,6 +5,7 @@ import {
     BedDouble, Search, Filter, Printer, Pencil, X, Check, DollarSign, Receipt,
     Coffee, Salad, IceCream, Pizza,
 } from 'lucide-react';
+import EmergencySosButton from '@/components/emergency-sos-button';
 import { index as foodIndex, store as foodStore, update as foodUpdate, destroy as foodDestroy, toggleAvailability as foodToggleAvailability } from '@/routes/food/index';
 import { store as orderStore, updateStatus as orderUpdateStatus, destroy as orderDestroy } from '@/routes/food-orders/index';
 
@@ -366,10 +367,11 @@ export default function Food({ foodItems, orders, activeRoomNumber, activeRoomId
                 {/* MENU MANAGEMENT */}
                 {tab === 'menu' && canManageMenu && (
                     <MenuManagement foodItems={foodItems} />
-                )}
-            </div>
+                )}                </div>
 
-            {/* RECEIPT MODAL */}
+                <EmergencySosButton />
+
+                {/* RECEIPT MODAL */}
             {receiptOrder && (
                 <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={() => setReceiptOrder(null)}>
                     <div className="bg-white rounded-xl max-w-md w-full" onClick={(e) => e.stopPropagation()}>

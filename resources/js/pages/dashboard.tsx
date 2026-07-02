@@ -1,5 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
 import { BookOpen, CalendarDays, Plus } from 'lucide-react';
+import EmergencySosButton from '@/components/emergency-sos-button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { create as bookingsCreate, index as bookingsIndex } from '@/routes/bookings';
@@ -123,6 +124,8 @@ export default function GuestDashboard({ stats, recentBookings }: DashboardProps
                     </CardContent>
                 </Card>
             </div>
+
+            <EmergencySosButton />
         </>
     );
 }

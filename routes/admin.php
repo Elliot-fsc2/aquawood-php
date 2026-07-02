@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\FloorController;
 use App\Http\Controllers\Admin\GuestController;
 use App\Http\Controllers\Admin\RoomController;
 use App\Http\Controllers\BookingController;
+use App\Http\Controllers\EmergencyController;
 use App\Http\Controllers\GuestRequestController;
 use Illuminate\Support\Facades\Route;
 
@@ -46,4 +47,9 @@ Route::middleware(['auth', 'role:'.RoleEnum::Admin->value])->prefix('admin')->na
     // Guest Requests
     Route::get('requests', [GuestRequestController::class, 'adminIndex'])->name('requests.index');
     Route::patch('requests/{guest_request}/status', [GuestRequestController::class, 'adminUpdateStatus'])->name('requests.update-status');
+
+    // Emergency Alerts
+    Route::get('emergencies', [EmergencyController::class, 'adminIndex'])->name('emergencies.index');
+    Route::patch('emergencies/{emergencyAlert}/acknowledge', [EmergencyController::class, 'acknowledge'])->name('emergencies.acknowledge');
+    Route::patch('emergencies/{emergencyAlert}/resolve', [EmergencyController::class, 'resolve'])->name('emergencies.resolve');
 });

@@ -28,6 +28,9 @@ enum PermissionEnum: string
     case CreateFoodOrders = 'create-food-orders';
     case EditFoodOrders = 'edit-food-orders';
     case CancelFoodOrders = 'cancel-food-orders';
+    case ViewEmergencyAlerts = 'view-emergency-alerts';
+    case AcknowledgeEmergencyAlerts = 'acknowledge-emergency-alerts';
+    case ResolveEmergencyAlerts = 'resolve-emergency-alerts';
 
     public static function values(): array
     {

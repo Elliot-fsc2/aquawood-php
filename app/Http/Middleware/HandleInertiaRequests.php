@@ -2,6 +2,9 @@
 
 namespace App\Http\Middleware;
 
+use App\Enums\ReservationStatusEnum;
+use App\Models\EmergencyAlert;
+use App\Models\Reservation;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -35,14 +38,28 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        $user = $request->user();
+
+        $activeEmergencyCount = $user && ($user->hasRole('Admin') || $user->hasRole('Receptionist'))
+            ? EmergencyAlert::where('status', 'active')->count()
+            : 0;
+
+        $canTriggerEmergency = $user && $user->hasRole('Guest')
+            ? Reservation::where('user_id', $user->id)
+                ->where('status', ReservationStatusEnum::CheckedIn->value)
+                ->exists()
+            : false;
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),
             'auth' => [
-                'user' => $request->user(),
-                'permissions' => $request->user()?->getAllPermissions()->pluck('name'),
-                'roles' => $request->user()?->getRoleNames(),
+                'user' => $user,
+                'permissions' => $user?->getAllPermissions()->pluck('name'),
+                'roles' => $user?->getRoleNames(),
             ],
+            'activeEmergencyCount' => $activeEmergencyCount,
+            'canTriggerEmergency' => $canTriggerEmergency,
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
     }

@@ -14,6 +14,7 @@ Route::middleware(['auth', 'role:'.RoleEnum::Receptionist->value.'|'.RoleEnum::A
         Route::patch('reservations/{reservation}/confirm', [FrontdeskController::class, 'confirmBooking'])->name('confirm');
         Route::patch('reservations/{reservation}/status', [FrontdeskController::class, 'updateStatus'])->name('update-status');
         Route::patch('reservations/{reservation}/cancel', [FrontdeskController::class, 'cancelReservation'])->name('cancel');
+        Route::patch('reservations/{reservation}/change-room', [FrontdeskController::class, 'changeRoom'])->name('change-room');
         Route::post('reservations', [FrontdeskController::class, 'storeReservation'])->name('store');
         Route::patch('rooms/{room}/status', [FrontdeskController::class, 'updateRoomStatus'])->name('room-status');
     });

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Actions\Frontdesk\CalculateProRatedPriceAction;
+use App\Actions\Frontdesk\ChangeRoomAction;
 use App\Actions\Frontdesk\CheckInAction;
 use App\Actions\Frontdesk\CheckOutAction;
 use App\Actions\Frontdesk\ConfirmBookingAction;
@@ -11,9 +12,11 @@ use App\Actions\Frontdesk\CreateWalkInReservationAction;
 use App\Actions\Frontdesk\GenerateReceiptAction;
 use App\Actions\Frontdesk\UpdateRoomStatusAction;
 use App\Enums\ReservationStatusEnum;
+use App\Models\EmergencyAlert;
 use App\Models\GuestRequest;
 use App\Models\Reservation;
 use App\Models\Room;
+use App\Models\RoomTransfer;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -81,6 +84,42 @@ class FrontdeskController extends Controller
                 'createdAt' => $req->created_at->diffForHumans(),
             ]);
 
+        $emergencyAlerts = EmergencyAlert::with('guest', 'room', 'reservation')
+            ->latest()
+            ->get()
+            ->map(fn ($alert) => [
+                'id' => (string) $alert->id,
+                'guestName' => $alert->guest?->name ?? 'Unknown',
+                'roomNumber' => $alert->room?->number ?? '',
+                'type' => $alert->type,
+                'details' => $alert->details,
+                'status' => $alert->status,
+                'acknowledgedByName' => $alert->acknowledgedBy?->name ?? null,
+                'acknowledgedAt' => $alert->acknowledged_at?->diffForHumans(),
+                'createdAt' => $alert->created_at->diffForHumans(),
+            ]);
+
+        $emergencyStats = [
+            'active' => $emergencyAlerts->where('status', 'active')->count(),
+            'acknowledged' => $emergencyAlerts->where('status', 'acknowledged')->count(),
+            'resolved' => $emergencyAlerts->where('status', 'resolved')->count(),
+        ];
+
+        $roomTransfers = RoomTransfer::with('fromRoom', 'toRoom', 'performedBy')
+            ->latest()
+            ->get()
+            ->map(fn ($transfer) => [
+                'id' => (string) $transfer->id,
+                'reservationId' => (string) $transfer->reservation_id,
+                'fromRoom' => 'Room '.$transfer->fromRoom->number,
+                'toRoom' => 'Room '.$transfer->toRoom->number,
+                'performedBy' => $transfer->performedBy?->name ?? 'Unknown',
+                'reason' => $transfer->reason,
+                'rateAdjustment' => (float) $transfer->rate_adjustment,
+                'notes' => $transfer->notes,
+                'createdAt' => $transfer->created_at->diffForHumans(),
+            ]);
+
         $stats = [
             'available' => Room::where('status', 'available')->count(),
             'occupied' => Room::where('status', 'occupied')->count(),
@@ -93,6 +132,9 @@ class FrontdeskController extends Controller
             'rooms' => $rooms,
             'reservations' => $reservations,
             'guestRequests' => $guestRequests,
+            'emergencyAlerts' => $emergencyAlerts,
+            'emergencyStats' => $emergencyStats,
+            'roomTransfers' => $roomTransfers,
             'stats' => $stats,
         ]);
     }
@@ -243,6 +285,40 @@ class FrontdeskController extends Controller
         Inertia::flash('toast', [
             'type' => 'success',
             'message' => 'Walk-in booked and checked in successfully.',
+        ]);
+
+        return back();
+    }
+
+    public function changeRoom(
+        Request $request,
+        Reservation $reservation,
+        ChangeRoomAction $changeRoom,
+    ): RedirectResponse {
+        $this->authorize('update', $reservation);
+
+        $validated = $request->validate([
+            'new_room_id' => ['required', 'exists:rooms,id'],
+            'reason' => ['nullable', 'string', 'max:255'],
+            'notes' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        try {
+            $newRoom = Room::findOrFail($validated['new_room_id']);
+            $changeRoom->handle(
+                $reservation,
+                $newRoom,
+                $request->user(),
+                $validated['reason'] ?? null,
+                $validated['notes'] ?? null,
+            );
+        } catch (\RuntimeException $e) {
+            return back()->withErrors(['change_room' => $e->getMessage()]);
+        }
+
+        Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => 'Guest moved to new room successfully.',
         ]);
 
         return back();

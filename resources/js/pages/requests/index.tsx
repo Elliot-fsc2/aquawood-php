@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
 import { Plus, MessageSquare, Clock, CheckCircle2, XCircle, LoaderCircle } from 'lucide-react';
+import EmergencySosButton from '@/components/emergency-sos-button';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -99,6 +100,8 @@ export default function RequestsIndex({ requests, canMakeRequest }: Props) {
                         Make Request
                     </Button>
                 </div>
+
+                <EmergencySosButton />
 
                 {!canMakeRequest && (
                     <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800">

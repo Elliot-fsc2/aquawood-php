@@ -1,6 +1,6 @@
 import { Link } from '@inertiajs/react';
 import { usePage } from '@inertiajs/react';
-import { BedDouble, BookOpen, Building2, CalendarCheck, LayoutGrid, Leaf, MessageSquare, Monitor, Tag, Users, Utensils } from 'lucide-react';
+import { AlertTriangle, BedDouble, BookOpen, Building2, CalendarCheck, LayoutGrid, Leaf, MessageSquare, Monitor, Tag, Users, Utensils } from 'lucide-react';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -20,6 +20,7 @@ import { index as adminCategoriesIndex } from '@/routes/admin/categories';
 import { index as adminGuestsIndex } from '@/routes/admin/guests';
 import { index as adminFloorsIndex } from '@/routes/admin/floors';
 import { index as adminRoomsIndex } from '@/routes/admin/rooms';
+import { index as adminEmergenciesIndex } from '@/routes/admin/emergencies';
 import { index as adminRequestsIndex } from '@/routes/admin/requests';
 import { index as bookingsIndex } from '@/routes/bookings';
 import { index as requestsIndex } from '@/routes/requests';
@@ -43,19 +44,21 @@ const footerNavItems: NavItem[] = [
 export function AppSidebar() {
     const { setOpenMobile } = useSidebar();
     const isMobile = useIsMobile();
-    const { auth } = usePage().props;
+    const { auth, activeEmergencyCount } = usePage().props as { auth: { roles?: string[] }; activeEmergencyCount?: number };
     const isAdmin = auth.roles?.includes('Admin') ?? false;
     const isReceptionist = auth.roles?.includes('Receptionist') ?? false;
     const isStaff = auth.roles?.includes('Staff') ?? false;
     const isGuest = auth.roles?.includes('Guest') ?? false;
     const canAccessFrontdesk = isAdmin || isReceptionist;
     const canAccessFood = isAdmin || isStaff || isReceptionist || isGuest;
+    const emergencyBadge = activeEmergencyCount && activeEmergencyCount > 0 ? activeEmergencyCount : null;
 
     const frontdeskNavItems: NavItem[] = [
         {
             title: 'Front Desk',
             href: frontdeskIndex(),
             icon: Monitor,
+            badge: emergencyBadge,
         },
     ];
 
@@ -110,6 +113,12 @@ export function AppSidebar() {
             title: 'Requests',
             href: adminRequestsIndex(),
             icon: MessageSquare,
+        },
+        {
+            title: 'Emergencies',
+            href: adminEmergenciesIndex(),
+            icon: AlertTriangle,
+            badge: emergencyBadge,
         },
     ];
 

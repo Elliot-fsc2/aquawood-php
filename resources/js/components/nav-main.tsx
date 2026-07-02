@@ -41,6 +41,11 @@ export function NavMain({ items = [], label = 'Platform' }: { items: NavItem[]; 
                             <Link href={item.href} prefetch onClick={handleNavClick}>
                                 {item.icon && <item.icon />}
                                 <span>{item.title}</span>
+                                {item.badge != null && item.badge !== 0 && (
+                                    <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1.5 text-[10px] font-bold text-white leading-none">
+                                        {item.badge}
+                                    </span>
+                                )}
                             </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>

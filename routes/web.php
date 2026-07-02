@@ -107,3 +107,4 @@ require __DIR__.'/settings.php';
 require __DIR__.'/admin.php';
 require __DIR__.'/frontdesk.php';
 require __DIR__.'/food.php';
+require __DIR__.'/emergency.php';
