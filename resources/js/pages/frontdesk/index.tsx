@@ -159,7 +159,7 @@ export default function FrontDesk({ rooms, reservations, guestRequests, emergenc
     const [changeRoomForm, setChangeRoomForm] = useState({ newRoomId: '', reason: '', notes: '' });
     const [showTransferHistory, setShowTransferHistory] = useState(false);
     const [showEmergencySection, setShowEmergencySection] = useState(emergencyAlerts.filter(a => a.status === 'active').length > 0);
-    const [emergencyFilter, setEmergencyFilter] = useState<string>('all');
+    const [emergencyFilter, setEmergencyFilter] = useState<string>('active');
     const [emergencySearch, setEmergencySearch] = useState('');
 
     const today = new Date().toISOString().slice(0, 10);

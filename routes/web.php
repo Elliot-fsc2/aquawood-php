@@ -34,6 +34,34 @@ Route::middleware(['auth', 'verified'])->group(function () {
         $user = $request->user();
         $isAdmin = $user->hasRole(RoleEnum::Admin->value);
 
+        $isReceptionist = $user->hasRole(RoleEnum::Receptionist->value);
+
+        if ($isReceptionist) {
+            $today = now()->format('Y-m-d');
+
+            $todayCheckIns = Reservation::whereDate('check_in_date', $today)
+                ->whereIn('status', [ReservationStatusEnum::Confirmed->value, ReservationStatusEnum::Pending->value])
+                ->count();
+
+            $todayCheckOuts = Reservation::whereDate('check_out_date', $today)
+                ->where('status', ReservationStatusEnum::CheckedIn->value)
+                ->count();
+
+            return Inertia::render('receptionist/dashboard', [
+                'stats' => [
+                    'available_rooms' => Room::where('status', RoomStatusEnum::Available->value)->count(),
+                    'occupied_rooms' => Room::where('status', RoomStatusEnum::Occupied->value)->count(),
+                    'maintenance_rooms' => Room::where('status', RoomStatusEnum::Maintenance->value)->count(),
+                    'booked_rooms' => Room::where('status', RoomStatusEnum::Booked->value)->count(),
+                    'total_rooms' => Room::count(),
+                    'today_check_ins' => $todayCheckIns,
+                    'today_check_outs' => $todayCheckOuts,
+                    'active_guests' => Reservation::where('status', ReservationStatusEnum::CheckedIn->value)->count(),
+                    'pending_bookings' => Reservation::where('status', ReservationStatusEnum::Pending->value)->count(),
+                ],
+            ]);
+        }
+
         if ($isAdmin) {
             $bookingsByStatus = Reservation::selectRaw('status, count(*) as count')
                 ->groupBy('status')
